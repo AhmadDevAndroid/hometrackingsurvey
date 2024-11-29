@@ -1,0 +1,21 @@
+<resources>
+    <string name="app_name">HouseHoldTracing</string>
+
+    <string name="allow_permission">Allow Permission</string>
+    <string name="deny_permission">Deny</string>
+    <string name="allow">Allow</string>
+    <string name="settings">Settings</string>
+    <string name="enable_location_msg">Please enable your location from application settings</string>
+    <string name="allow_permission_msg">To determine your location, application need to access to your location and movement. Please allow</string>
+    <string name="not_now">Not Now</string>
+
+    <string name="tracking_location">Tracking User activity&#8230;</string>
+
+    <string name="internet_missing_error">No Internet available, please check your WiFi or Data connection and try again!</string>
+    <string name="connection_error">Unable to establish a connection. please check your WiFi or Data connection and try again!</string>
+    <string name="please_try_later">Please try again later</string>
+
+    <string name="no_internet">No Internet connection</string>
+    <string name="network_error">Network Error</string>
+    <string name="something_went_wrong">Something went wrong!</string>
+</resources>
