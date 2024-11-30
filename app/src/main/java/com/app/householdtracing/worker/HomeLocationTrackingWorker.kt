@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.app.householdtracing.data.datastore.PreferencesManager
 import com.app.householdtracing.data.model.HomeTrackingLocations
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
 import com.app.householdtracing.util.AppNotificationManager
@@ -89,15 +90,18 @@ class HomeLocationTrackingWorker(
             location,
             savedLocations,
             onLocationDiscovered = {
+                repo.insertHomeTrackingLocation(
+                    createHomeTrackingLocation(location)
+                )
+                saveLocationInfo(location)
+                repo.deleteAll()
                 notificationManager.setUpNotification(
                     LOCATION_WORKER_CHANNEL_ID,
                     "Location Found: ${location.latitude}, ${location.longitude}"
                 )
-                repo.insertHomeTrackingLocation(
-                    createHomeTrackingLocation(location)
-                )
             },
             notBetweenLocation = {
+                repo.deleteAndInsertNew(createHomeTrackingLocation(location))
                 notificationManager.setUpNotification(
                     LOCATION_WORKER_CHANNEL_ID,
                     "Location Not Within Range."
@@ -139,5 +143,11 @@ class HomeLocationTrackingWorker(
             if (distance > DISTANCE_THRESHOLD) return false
         }
         return true
+    }
+
+    private suspend fun saveLocationInfo(it: Location) {
+        PreferencesManager.putValue(PreferencesManager.isLocationFound, true)
+        PreferencesManager.putValue(PreferencesManager.latitude, it.longitude)
+        PreferencesManager.putValue(PreferencesManager.longitude, it.longitude)
     }
 }

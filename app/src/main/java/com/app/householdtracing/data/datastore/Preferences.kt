@@ -3,7 +3,10 @@ package com.app.householdtracing.data.datastore
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.doublePreferencesKey
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.app.householdtracing.App
@@ -18,6 +21,9 @@ object PreferencesManager {
 
     private val context = App.getInstance()
     val SUNRISE_TIME = longPreferencesKey("sunrise_time")
+    val latitude = doublePreferencesKey("location")
+    val longitude = doublePreferencesKey("location")
+    val isLocationFound = booleanPreferencesKey("location_found")
 
     suspend fun <T> putValue(key: Preferences.Key<T>, value: T) {
         context.dataStore.edit { preferences ->
