@@ -1,13 +1,17 @@
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp.room)
+    alias(libs.plugins.kotlin.serialization)
 }
 
 android {
     namespace = "com.app.householdtracing"
     compileSdk = 35
+    flavorDimensions("environment")
 
     defaultConfig {
         applicationId = "com.app.householdtracing"
@@ -20,7 +24,7 @@ android {
     }
 
     buildTypes {
-        release {
+        debug {
             isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
@@ -35,8 +39,24 @@ android {
     kotlinOptions {
         jvmTarget = "21"
     }
+    productFlavors {
+        create("stagging") {
+            buildConfigField("String", "ENVIRONMENT", "\"stagging\"")
+            applicationId = "app.aisight.ai.gtm"
+            buildConfigField("String", "BASE_URL", "\"https://pk-census-conductor.surveyauto.com/api/v1/\"")
+        }
+        create("production") {
+            buildConfigField("String", "ENVIRONMENT", "\"production\"")
+            applicationId = "app.aisight.ai.gtm"
+            buildConfigField("String", "BASE_URL", "\"https://pk-census-conductor.surveyauto.com/api/v1/\"")
+        }
+    }
     buildFeatures {
         compose = true
+        buildConfig = true
+    }
+    composeOptions {
+        kotlinCompilerExtensionVersion = "1.5.1"
     }
 
     ksp {
@@ -74,9 +94,13 @@ dependencies {
     implementation(libs.runtime.permission)
     implementation(libs.timber)
     implementation(libs.koin.android)
+    implementation(libs.koin.core)
+    implementation(libs.koin.compose)
     implementation(libs.preference.datastore)
     implementation(libs.androidx.datastore)
     implementation(libs.room.runtime)
     implementation(libs.room.ktx)
     ksp(libs.room.ksp)
+    implementation(libs.navigation.compose)
+    implementation(libs.kotlinx.serialization.json)
 }

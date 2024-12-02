@@ -11,6 +11,8 @@ kotlinxCoroutinesPlayServices = "1.7.3"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.11.00"
+composeNavigation = "2.8.4"
+serialization = "1.6.3"
 
 play-services = "21.3.0"
 retrofit-version = "2.11.0"
@@ -50,16 +52,21 @@ okhttp-interceptor = { group = "com.squareup.okhttp3", name = "logging-intercept
 kotlin-coroutines = { group = "org.jetbrains.kotlinx", name = "kotlinx-coroutines-core", version.ref = "kotlinxCoroutinesPlayServices" }
 runtime-permission = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "permission-version" }
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber-version" }
-koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-core = { group = "io.insert-koin", name = "koin-core", version.ref = "koin" }
+koin-android = { group = "io.insert-koin", name = "koin-android", version.ref = "koin" }
+koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", version.ref = "koin" }
 preference-datastore = { group = "androidx.datastore", name = "datastore", version.ref = "datastore-version" }
 androidx-datastore = { group = "androidx.datastore", name = "datastore-preferences", version.ref = "datastore-version" }
 room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-db" }
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room-db" }
 room-ksp = { group = "androidx.room", name = "room-compiler", version.ref = "room-db" }
+navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
 kotlin-compose = { id = "org.jetbrains.kotlin.plugin.compose", version.ref = "kotlin-compose" }
 ksp-room = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
 

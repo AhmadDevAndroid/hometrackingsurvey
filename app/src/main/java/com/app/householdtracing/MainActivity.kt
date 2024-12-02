@@ -14,8 +14,13 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.navigation.compose.NavHost
+import androidx.navigation.compose.composable
+import androidx.navigation.compose.rememberNavController
+import com.app.householdtracing.navigator.LoginScreen
 import com.app.householdtracing.tracking.UserHouseTrackingService
 import com.app.householdtracing.ui.permission.PermissionPopup
+import com.app.householdtracing.ui.screens.LoginScreen
 import com.app.householdtracing.ui.theme.HouseHoldTracingTheme
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.app.householdtracing.util.PermissionUtil
@@ -30,11 +35,20 @@ class MainActivity : ComponentActivity() {
 
         setContent {
             HouseHoldTracingTheme {
-                PermissionHandler()
-//                Scaffold(modifier = Modifier.fillMaxSize()) { innerPadding ->
-//
-//
-//                }
+                val navController = rememberNavController()
+                //PermissionHandler()
+                NavHost(
+                    navController = navController,
+                    startDestination = LoginScreen
+                ) {
+                    composable<LoginScreen> {
+                        LoginScreen(
+                            onLoginClick = {}
+                        )
+                    }
+
+                }
+
             }
         }
     }
