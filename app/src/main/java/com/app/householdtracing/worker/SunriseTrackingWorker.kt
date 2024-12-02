@@ -96,6 +96,8 @@ class SunriseTrackingWorker(
 
     private suspend fun processSunriseResults(results: SunriseResults) {
         val sunriseTime = parseTime(results.sunrise)
+        //val currentTimeInMillis = System.currentTimeMillis()
+        //val tenMinutesLater = currentTimeInMillis + 10 * 60 * 1000
         val calendar = Calendar.getInstance()
         if (sunriseTime <= 0) {
             Timber.tag(TAG).e("Invalid sunrise time")
@@ -108,6 +110,7 @@ class SunriseTrackingWorker(
             "Sunrise: ${results.sunrise}, Sunset: ${results.sunset}"
         )
         scheduleNextAlarm(results, calendar)
+        //scheduleNextAlarm(tenMinutesLater, calendar)
     }
 
     private fun scheduleNextAlarm(results: SunriseResults, calendar: Calendar) {
@@ -119,5 +122,23 @@ class SunriseTrackingWorker(
         alarmTimes.forEach { alarmTime ->
             alarmManager.scheduleNextAlarmTime(alarmTime, sunriseCalendar.timeInMillis)
         }
+
+//    private fun scheduleNextAlarm(alarmTime: Long, calendar: Calendar) {
+//        // Use the current time as a base for testing
+//        val currentTimeInMillis = System.currentTimeMillis()
+//        val tenMinutesLater = currentTimeInMillis + 10 * 60 * 1000
+//        val dateFormat = SimpleDateFormat(DateUtil.TIME_PATTERN, Locale.getDefault())
+//        val formattedTime = dateFormat.format(Date(tenMinutesLater))
+//        val sunriseCalendar = DateUtil.getMillisecondsFromDate(calendar, formattedTime)
+//        val availableTime = sunriseCalendar.timeInMillis - currentTimeInMillis
+//        val alarmTimes = nextAlarmTimes(sunriseCalendar, availableTime)
+//        Timber.tag("Alarm Test").d("Current time: $currentTimeInMillis, Alarm time: $alarmTime")
+//
+//        // Schedule the alarm
+//
+//        alarmTimes.forEach { alarm ->
+//            alarmManager.scheduleNextAlarmTime(alarm, sunriseCalendar.timeInMillis)
+//        }
+//    }
     }
 }

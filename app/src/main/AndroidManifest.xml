@@ -4,13 +4,16 @@
 
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+    <uses-permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION" />
-    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM"
+    <uses-permission
+        android:name="android.permission.SCHEDULE_EXACT_ALARM"
         tools:ignore="ProtectedPermissions" />
     <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
 
     <application
@@ -40,7 +43,11 @@
             android:name=".tracking.UserHouseTrackingService"
             android:foregroundServiceType="location" />
 
-        <receiver android:name=".receiver.AlarmReceiver"/>
+        <receiver
+            android:name=".receiver.AlarmReceiver"
+            android:enabled="true"
+            android:exported="true"
+            tools:ignore="ExportedReceiver" />
     </application>
 
 </manifest>

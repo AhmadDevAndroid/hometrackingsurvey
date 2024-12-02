@@ -7,12 +7,16 @@ import java.util.TimeZone
 
 object DateUtil {
 
-    private const val TIME_PATTERN = "yyyy-MM-dd h:mm:ss a"
+    const val TIME_PATTERN = "yyyy-MM-dd h:mm:ss a"
+
     private const val FOUR_AND_HALF_HOURS_IN_MILLISECONDS: Long =
         4 * 60 * 60 * 1000 + 30 * 60 * 1000
     private const val THREE_HOURS_IN_MILLISECONDS: Long = 3 * 60 * 60 * 1000
-    private const val ONE_HOUR_IN_MILLISECONDS: Long = 1 * 60 * 60 * 1000
-    private const val THIRTY_MINUTES_IN_MILLISECONDS: Long = 30 * 60 * 1000
+    private const val ONE_HOUR_AND_HALF_IN_MILLISECONDS: Long = 1 * 60 * 60 * 1000 + 30 * 60 * 1000
+
+//    private const val FOUR_AND_HALF_HOURS_IN_MILLISECONDS: Long = 8 * 60 * 1000
+//    private const val THREE_HOURS_IN_MILLISECONDS: Long = 6 * 60 * 1000
+//    private const val ONE_HOUR_AND_HALF_IN_MILLISECONDS: Long = 2 * 60 * 1000
 
 
     fun parseTime(sunrise: String): Long {
@@ -63,11 +67,11 @@ object DateUtil {
 
         // Schedule alarms if enough time left before sunrise
         when {
-            availableTime >= (FOUR_AND_HALF_HOURS_IN_MILLISECONDS + THREE_HOURS_IN_MILLISECONDS + ONE_HOUR_IN_MILLISECONDS + THIRTY_MINUTES_IN_MILLISECONDS) -> {
+            availableTime >= (FOUR_AND_HALF_HOURS_IN_MILLISECONDS + THREE_HOURS_IN_MILLISECONDS + ONE_HOUR_AND_HALF_IN_MILLISECONDS) -> {
                 alarmTimes.apply {
                     add(sunriseCalendar.timeInMillis - FOUR_AND_HALF_HOURS_IN_MILLISECONDS)
                     add(sunriseCalendar.timeInMillis - THREE_HOURS_IN_MILLISECONDS)
-                    add(sunriseCalendar.timeInMillis - ONE_HOUR_IN_MILLISECONDS - THIRTY_MINUTES_IN_MILLISECONDS)
+                    add(sunriseCalendar.timeInMillis - ONE_HOUR_AND_HALF_IN_MILLISECONDS)
                 }
             }
 

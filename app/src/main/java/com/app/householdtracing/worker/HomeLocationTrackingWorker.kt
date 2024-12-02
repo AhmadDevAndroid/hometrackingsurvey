@@ -73,7 +73,10 @@ class HomeLocationTrackingWorker(
             )
             return Result.retry()
         }
-
+        notificationManager.setUpNotification(
+            LOCATION_WORKER_CHANNEL_ID,
+            "location fetched..."
+        )
         processLocation(currentLocation)
         return Result.success()
     }
