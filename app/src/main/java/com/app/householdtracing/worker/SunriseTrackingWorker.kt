@@ -10,7 +10,7 @@ import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import com.app.householdtracing.data.datastore.PreferencesManager
-import com.app.householdtracing.data.model.SunriseResponseBody.SunriseResults
+import com.app.householdtracing.data.model.responsedto.SunriseResponseBody.SunriseResults
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
 import com.app.householdtracing.network.converter.Status
 import com.app.householdtracing.util.AlarmManager

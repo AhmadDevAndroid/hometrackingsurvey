@@ -1,119 +1,75 @@
 package com.app.householdtracing
 
-import android.app.Activity
-import android.content.Context
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.res.stringResource
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.app.householdtracing.navigator.LoginScreen
-import com.app.householdtracing.tracking.UserHouseTrackingService
-import com.app.householdtracing.ui.permission.PermissionPopup
+import com.app.householdtracing.data.model.responsedto.LoginResponseBody
+import com.app.householdtracing.navigation.Screen
 import com.app.householdtracing.ui.screens.LoginScreen
-import com.app.householdtracing.ui.theme.HouseHoldTracingTheme
-import com.app.householdtracing.util.AppUtil.showLogError
-import com.app.householdtracing.util.PermissionUtil
-import com.google.accompanist.permissions.ExperimentalPermissionsApi
-import com.google.accompanist.permissions.isGranted
-import com.google.accompanist.permissions.rememberPermissionState
+import com.app.householdtracing.ui.screens.ShoppingTripScreen
+import com.app.householdtracing.ui.theme.HouseHoldTheme
+import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
+import org.koin.androidx.compose.koinViewModel
 
 class MainActivity : ComponentActivity() {
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
 
         setContent {
-            HouseHoldTracingTheme {
-                val navController = rememberNavController()
-                //PermissionHandler()
-                NavHost(
-                    navController = navController,
-                    startDestination = LoginScreen
-                ) {
-                    composable<LoginScreen> {
-                        LoginScreen(
-                            onLoginClick = {}
-                        )
-                    }
-
-                }
-
+            HouseHoldTheme {
+                NavigationHandler()
             }
         }
     }
 }
 
-@OptIn(ExperimentalPermissionsApi::class)
 @Composable
-fun PermissionHandler() {
+fun NavigationHandler() {
+    val navController = rememberNavController()
+    val loginScreenViewModel: LoginScreenViewModel = koinViewModel()
 
-    val context = LocalContext.current
+    val loginState by loginScreenViewModel.getUser()
+        .collectAsState(initial = LoginResponseBody(token = "initial"))
 
-    val permissions = PermissionUtil.getPermissionList()
-    val locationPermission = rememberPermissionState(permission = permissions[0])
-    val notificationPermission = rememberPermissionState(permission = permissions[2])
-
-
-    val isAllPermissionGranted =
-        locationPermission.status.isGranted && notificationPermission.status.isGranted
-
-    val launcherMultiplePermissions = rememberLauncherForActivityResult(
-        ActivityResultContracts.RequestMultiplePermissions()
-    ) { permissionsMap ->
-
-        permissionsMap.entries.forEach { (permission, isGranted) ->
-            /*if (isGranted) {
-                showLogError("Permissions", "$permission granted.")
-            } else {
-                showLogError("Permissions", "$permission denied.")
-            }*/
-        }
+    val startDestination = when {
+        loginState.token == "initial" -> null
+        loginState.token.isNotEmpty() -> Screen.ShoppingTrip.route
+        else -> Screen.Login.route
     }
 
-    when {
-        isAllPermissionGranted -> {
-            showLogError("${App.APP_TAG} Permissions", "all granted")
+    if (startDestination == null) {
+        CircularProgressIndicator()
+        return
+    }
 
-            LaunchedEffect(key1 = Unit) {
-                startLocationTrackingService(context)
-            }
+    NavHost(
+        navController = navController,
+        startDestination = startDestination
+    ) {
+        composable(Screen.Login.route) {
+            LoginScreen(onLoginClick = {
+                navController.navigate(Screen.ShoppingTrip.route)
+            })
         }
-
-        else -> {
-            PermissionPopup(
-                yesBtnText = stringResource(id = R.string.allow),
-                permissionText = stringResource(id = R.string.allow_permission_msg),
-                onDenyPress = {
-                    (context as Activity).finish()
-                },
-                onAllowPress = {
-                    launcherMultiplePermissions.launch(permissions)
-                })
+        composable(Screen.ShoppingTrip.route) {
+            ShoppingTripScreen(
+                onGrocerMissionClick = {},
+                onTopUpMissionClick = {},
+                onImpulseBuyingMissionClick = {}
+            )
         }
     }
 }
 
-private fun startLocationTrackingService(context: Context) {
-    val serviceIntent = Intent(context, UserHouseTrackingService::class.java)
-    when {
-        Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
-            context.startForegroundService(serviceIntent)
-        }
 
-        else -> {
-            context.startService(serviceIntent)
-        }
-    }
-}
 

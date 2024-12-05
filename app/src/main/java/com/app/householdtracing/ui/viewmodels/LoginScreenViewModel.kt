@@ -1,22 +1,21 @@
 package com.app.householdtracing.ui.viewmodels
 
-import android.app.Application
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.app.householdtracing.data.model.LoginResponseBody
+import com.app.householdtracing.data.model.responsedto.LoginResponseBody
 import com.app.householdtracing.data.repositoryImpl.AuthRepositoryImpl
 import kotlinx.coroutines.launch
 
 class LoginScreenViewModel(
-    private val mApplication: Application,
     private val authRepositoryImpl: AuthRepositoryImpl
 ) : ViewModel() {
 
-    var emailTextField = mutableStateOf("")
-    var passwordTextField = mutableStateOf("")
+    var emailTextField by mutableStateOf("hamzaali@gmail.com")
+    var passwordTextField by mutableStateOf("123456")
+    var isAllPermissionGranted by mutableStateOf(false)
 
     var authState by mutableStateOf<LoginUiState>(LoginUiState.Idle)
         private set
@@ -31,6 +30,8 @@ class LoginScreenViewModel(
             )
         }
     }
+
+    fun getUser() = authRepositoryImpl.getUser()
 }
 
 

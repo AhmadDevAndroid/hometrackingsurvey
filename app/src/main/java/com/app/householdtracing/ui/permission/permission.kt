@@ -14,6 +14,7 @@ import androidx.compose.foundation.layout.wrapContentWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -22,15 +23,13 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import com.app.householdtracing.ui.theme.Typography
 import com.app.householdtracing.R
-import com.app.householdtracing.ui.theme.medium
-import com.app.householdtracing.ui.theme.regular
 
 @Composable
 inline fun PermissionPopup(
@@ -64,7 +63,7 @@ inline fun PermissionPopup(
                         .padding(top = 30.dp),
                     text = stringResource(id = R.string.allow_permission),
                     color = colorResource(id = R.color.black),
-                    style = Typography.medium
+                    style = MaterialTheme.typography.displaySmall
                 )
 
                 Text(
@@ -74,7 +73,9 @@ inline fun PermissionPopup(
                         .padding(10.dp),
                     text = permissionText,
                     color = colorResource(id = R.color.black),
-                    style = Typography.regular
+                    style = MaterialTheme.typography.displaySmall.copy(
+                        fontWeight = FontWeight.W300
+                    )
                 )
 
                 Row(
@@ -121,7 +122,7 @@ inline fun RowScope.PermissionButton(color: Color, text: String, crossinline onC
         Text(
             text = text,
             color = colorResource(id = R.color.white),
-            style = Typography.bodyMedium,
+            style = MaterialTheme.typography.displayMedium,
             fontSize = 15.sp,
             textAlign = TextAlign.Center
         )

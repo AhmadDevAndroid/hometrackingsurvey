@@ -7,6 +7,7 @@
     <string name="settings">Settings</string>
     <string name="enable_location_msg">Please enable your location from application settings</string>
     <string name="allow_permission_msg">To determine your location, application need to access to your location and movement. Please allow</string>
+    <string name="allow_background_permission_msg">To determine your background location while application is close, application need to access to your location and movement. Please allow</string>
     <string name="not_now">Not Now</string>
 
     <string name="tracking_location">Tracking User activity&#8230;</string>
@@ -22,8 +23,14 @@
     <!--Login Screen Strings-->
     <string name="tv_track_shopping_mission">Track Shopping Mission</string>
     <string name="btn_login">Log In</string>
-    <string name="tv_username">Username or email</string>
+    <string name="tv_username">Username or Email</string>
     <string name="tv_password">Password</string>
     <string name="tv_username_placeholder">example@example.com</string>
-    <string name="tv_password_placeholder">********</string>
+    <string name="tv_password_placeholder">123456</string>
+
+    <!--Shopping Trip-->
+    <string name="tv_select_shopping_trip">Select Shopping Trip</string>
+    <string name="tv_groceries">Grocery\nMission</string>
+    <string name="tv_top_up">Top-up\nMission</string>
+    <string name="tv_impulse_purchase">Impulse\nBuying</string>
 </resources>

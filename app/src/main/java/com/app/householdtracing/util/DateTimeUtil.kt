@@ -2,6 +2,7 @@ package com.app.householdtracing.util
 
 import java.text.SimpleDateFormat
 import java.util.Calendar
+import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
 
@@ -25,6 +26,12 @@ object DateUtil {
         val calendar = Calendar.getInstance().apply { time = date }
         return calendar.timeInMillis
     }
+
+    fun getHourAndMinute() =
+        SimpleDateFormat(
+            "dd MMM, hh:mm:ss a",
+            Locale.getDefault()
+        ).format(Date(System.currentTimeMillis()))
 
     fun getMillisecondsFromDate(calendar: Calendar, time: String) = calendar.apply {
         val year = get(Calendar.YEAR)

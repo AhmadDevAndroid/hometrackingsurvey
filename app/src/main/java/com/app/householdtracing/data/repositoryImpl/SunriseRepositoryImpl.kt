@@ -2,7 +2,7 @@ package com.app.householdtracing.data.repositoryImpl
 
 import app.household.data.db.dao.HomeTrackingDao
 import com.app.householdtracing.data.model.HomeTrackingLocations
-import com.app.householdtracing.data.model.SunriseResponseBody
+import com.app.householdtracing.data.model.responsedto.SunriseResponseBody
 import com.app.householdtracing.network.converter.Resource
 import com.app.householdtracing.network.services.HouseHoldApiService
 

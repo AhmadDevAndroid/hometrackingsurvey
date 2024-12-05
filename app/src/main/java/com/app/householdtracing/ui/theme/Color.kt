@@ -12,8 +12,8 @@ val secondaryTextColor = Color(0xFF031314)
 val lightThemeBackgroundColor = Color(0xFFF9FFFA)
 val hintColor = Color(0xFF064E86)
 val placeholderHintColor = Color(0x73064E86)
-val textFieldColor = Color(0xFF0E3E3E)
-val textFieldBGColor = Color(0xFFCBE8ED)
+val textFieldColor = Color(0xE6064E86)
+val errorColor = Color(0xFFC43B00)
 
 
 

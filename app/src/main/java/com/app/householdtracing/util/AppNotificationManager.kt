@@ -20,6 +20,7 @@ class AppNotificationManager(private val context: Context) {
         const val TRACKING_NOTIFICATION_CHANNEL_ID = "tracking_id"
         const val WORKER_CHANNEL_ID = "worker"
         const val LOCATION_WORKER_CHANNEL_ID = "location_worker"
+        const val GEOFENCE_CHANNEL_ID = "geofence_id"
     }
 
      fun createNotificationChannel(channelId: String) {

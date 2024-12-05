@@ -18,6 +18,15 @@ object PermissionUtil {
         }
     }
 
+    val backgroundPermission = when {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q -> {
+            Manifest.permission.ACCESS_BACKGROUND_LOCATION
+        }
+        else -> {
+            "android.permission.ACCESS_BACKGROUND_LOCATION"
+        }
+    }
+
 
     @SuppressLint("InlinedApi")
     fun getPermissionList() = arrayOf(
@@ -31,6 +40,12 @@ object PermissionUtil {
         context,
         permission
     ) == PackageManager.PERMISSION_GRANTED
+
+    fun isActivityRecognitionPermissionGranted(context: Context) =
+        ContextCompat.checkSelfPermission(
+            context,
+            activityPermission
+        ) == PackageManager.PERMISSION_GRANTED
 
 
 }

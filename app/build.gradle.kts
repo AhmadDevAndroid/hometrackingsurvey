@@ -1,11 +1,10 @@
-import java.util.Properties
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.ksp.room)
     alias(libs.plugins.kotlin.serialization)
+    alias(libs.plugins.proto)
 }
 
 android {
@@ -21,6 +20,7 @@ android {
         versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
     }
 
     buildTypes {
@@ -42,13 +42,13 @@ android {
     productFlavors {
         create("stagging") {
             buildConfigField("String", "ENVIRONMENT", "\"stagging\"")
-            applicationId = "app.aisight.ai.gtm"
-            buildConfigField("String", "BASE_URL", "\"https://pk-census-conductor.surveyauto.com/api/v1/\"")
+            applicationId = "com.app.householdtracing"
+            buildConfigField("String", "BASE_URL", "\"https://pk-census-composer-new.surveyauto.com/api/v3/\"")
         }
         create("production") {
             buildConfigField("String", "ENVIRONMENT", "\"production\"")
-            applicationId = "app.aisight.ai.gtm"
-            buildConfigField("String", "BASE_URL", "\"https://pk-census-conductor.surveyauto.com/api/v1/\"")
+            applicationId = "com.app.householdtracing"
+            buildConfigField("String", "BASE_URL", "\"https://pk-census-composer-new.surveyauto.com/api/v3/\"")
         }
     }
     buildFeatures {
@@ -103,4 +103,18 @@ dependencies {
     ksp(libs.room.ksp)
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
+    implementation(libs.proto.datastore)
+}
+
+protobuf {
+    protoc {
+        artifact = "com.google.protobuf:protoc:3.19.4"
+    }
+    generateProtoTasks {
+        all().forEach { task ->
+            task.plugins.create("java") {
+                option("lite")
+            }
+        }
+    }
 }

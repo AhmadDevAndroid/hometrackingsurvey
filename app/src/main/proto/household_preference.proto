@@ -1,0 +1,9 @@
+syntax = "proto3";
+
+option java_package = "com.app.householdtracing";
+option java_multiple_files = true;
+
+message LoginResponse {
+  string token = 1;
+
+}

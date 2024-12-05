@@ -1,4 +1,4 @@
-package com.app.householdtracing.data.model
+package com.app.householdtracing.data.model.responsedto
 
 data class SunriseResponseBody(
     val results: SunriseResults,
