@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Build
+import com.app.householdtracing.receiver.GeofenceBroadcastReceiver
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
 import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT
@@ -13,57 +14,79 @@ import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
 import timber.log.Timber
 
-class GeofenceManagerClient(context: Context) {
+class GeofenceManagerClient(private val context: Context) {
     private val TAG = "GeofenceManagerClient"
     private val client = LocationServices.getGeofencingClient(context)
-    val geofenceList = mutableMapOf<String, Geofence>()
+    private val geofenceList = mutableListOf<Geofence>()
 
     companion object {
-        const val CUSTOM_INTENT_GEOFENCE = "GEOFENCE-TRANSITION-INTENT-ACTION"
         const val CUSTOM_REQUEST_CODE_GEOFENCE = 1001
-
     }
 
-    fun addGeofence(
-        key: String,
-        location: Location,
-        radiusInMeters: Float = 200.0f
-    ) {
-        geofenceList[key] = createGeofence(key, location, radiusInMeters)
+    private val receiverIntent by lazy {
+        Intent(context, GeofenceBroadcastReceiver::class.java)
     }
 
     private val geofencingPendingIntent by lazy {
         PendingIntent.getBroadcast(
             context,
             CUSTOM_REQUEST_CODE_GEOFENCE,
-            Intent(CUSTOM_INTENT_GEOFENCE),
+            receiverIntent,
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
-                PendingIntent.FLAG_CANCEL_CURRENT
+                PendingIntent.FLAG_UPDATE_CURRENT
             } else {
                 PendingIntent.FLAG_MUTABLE
             }
         )
     }
 
+    fun addGeofences(
+        requestIds: List<String>,
+        locations: List<Location>,
+        radiusInMeters: Float
+    ) {
+        if (requestIds.size != locations.size) {
+            throw IllegalArgumentException("The number of requestIds must match the number of locations")
+        }
+
+        val geofence = createGeofence("maja_rica", Location("").apply {
+           latitude = 31.518693
+            longitude = 74.323877
+        }, radiusInMeters)
+        geofenceList.add(geofence)
+
+      /*  requestIds.zip(locations).forEachIndexed { index, (requestId, location) ->
+            val geofence = createGeofence("item_$index", location, radiusInMeters)
+            geofenceList.add(geofence)
+        }*/
+    }
+
     @SuppressLint("MissingPermission")
     fun registerGeofence() {
-        client.addGeofences(createGeofencingRequest(), geofencingPendingIntent)
-            .addOnSuccessListener {
+        if (geofenceList.isEmpty()) {
+            Timber.tag(TAG).d("registerGeofence: No geofences to register.")
+            return
+        }
+
+        client.addGeofences(createGeofencingRequest(), geofencingPendingIntent).run {
+            addOnSuccessListener {
                 Timber.tag(TAG).d("registerGeofence: SUCCESS")
             }.addOnFailureListener { exception ->
                 Timber.tag(TAG).d("registerGeofence: Failure\n$exception")
             }
+        }
     }
 
     fun deregisterGeofence() {
         client.removeGeofences(geofencingPendingIntent)
         geofenceList.clear()
+        Timber.tag(TAG).d("deregisterGeofence: All geofences removed.")
     }
 
     private fun createGeofencingRequest(): GeofencingRequest {
         return GeofencingRequest.Builder().apply {
-            setInitialTrigger(GEOFENCE_TRANSITION_ENTER)
-            addGeofences(geofenceList.values.toList())
+            setInitialTrigger(GeofencingRequest.INITIAL_TRIGGER_ENTER)
+            addGeofences(geofenceList)
         }.build()
     }
 
@@ -76,6 +99,7 @@ class GeofenceManagerClient(context: Context) {
             .setRequestId(key)
             .setCircularRegion(location.latitude, location.longitude, radiusInMeters)
             .setTransitionTypes(GEOFENCE_TRANSITION_ENTER or GEOFENCE_TRANSITION_EXIT)
+            .setExpirationDuration(Geofence.NEVER_EXPIRE)
             .build()
     }
 }

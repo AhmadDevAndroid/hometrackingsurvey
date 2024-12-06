@@ -54,7 +54,7 @@ fun NavigationHandler() {
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = Screen.ShoppingTrip.route
     ) {
         composable(Screen.Login.route) {
             LoginScreen(onLoginClick = {

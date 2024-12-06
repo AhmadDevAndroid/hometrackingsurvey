@@ -16,6 +16,7 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
         val notificationManager by lazy { AppNotificationManager(context) }
+        notificationManager.setUpNotification("GeoFence rece", "onreceive")
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent?.hasError() == true) {
             val errorMessage = GeofenceStatusCodes
@@ -23,19 +24,24 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             Timber.tag(TAG).e(errorMessage)
             return
         }
-        // Get the transition type.
+        // Get the transition type
         when (geofencingEvent?.geofenceTransition) {
 
             Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                notificationManager.setUpNotification(GEOFENCE_CHANNEL_ID, "Enterance")
+                geofencingEvent.triggeringGeofences?.forEach { item->
+                    item.requestId
+                    println("Enter ID: ${item.requestId}")
+                }
+                notificationManager.setUpNotification("GeoFence Enter", "Enter")
             }
 
-            Geofence.GEOFENCE_TRANSITION_DWELL -> {
-                notificationManager.setUpNotification(GEOFENCE_CHANNEL_ID, "Dwell")
-            }
 
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                notificationManager.setUpNotification(GEOFENCE_CHANNEL_ID, "Exit")
+                geofencingEvent.triggeringGeofences?.forEach { item->
+                    item.requestId
+                    println("Exit requestId: ${item.requestId}")
+                }
+                notificationManager.setUpNotification("GeoFence Exit", "Exit")
             }
 
             else -> {

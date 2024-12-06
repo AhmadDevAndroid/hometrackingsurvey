@@ -14,8 +14,8 @@ object AppUtil {
 
     private const val MAX_RETRY_ATTEMPTS = 5
     private const val RETRY_DELAY_MS = 3000L
-    const val RADIUS = 200
-    const val GEOFENCE_RADIUS = 20.0f
+    const val RADIUS = 90
+    const val GEOFENCE_RADIUS = 100.0f
 
     fun showLogError(tag: String, msg: String) {
         Timber.tag(tag).e(msg)

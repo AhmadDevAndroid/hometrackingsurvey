@@ -8,6 +8,7 @@ import android.location.Location
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
+import android.util.Log
 import com.app.householdtracing.data.datastore.PreferencesManager
 import com.app.householdtracing.data.repositoryImpl.GeofencingRepository
 import com.app.householdtracing.location.GeofenceManagerClient
@@ -49,15 +50,16 @@ class UserHouseTrackingService : Service() {
     override fun onCreate() {
         super.onCreate()
 
-        scope.launch {
-            PreferencesManager.getValue(PreferencesManager.SUNRISE_TIME, 0).collectLatest {
-                SunriseTrackingWorker.configureWorker(this@UserHouseTrackingService)
-            }
-        }
+//        scope.launch {
+//            PreferencesManager.getValue(PreferencesManager.SUNRISE_TIME, 0).collectLatest {
+//                SunriseTrackingWorker.configureWorker(this@UserHouseTrackingService)
+//            }
+//        }TODO() Chnages
 
         currentLocation { location ->
             scope.launch {
-                latLngApiCall(location.latitude, location.longitude, RADIUS)
+                showLogError("Location","current: ${location.latitude},${location.longitude}")
+                latLngApiCall(31.5195761, 74.3247801, RADIUS)
             }
         }
 
@@ -65,8 +67,7 @@ class UserHouseTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundService()
-        userActivityTransitionManager.registerActivityTransitions()
-        geofenceManagerClient.registerGeofence()
+        //userActivityTransitionManager.registerActivityTransitions()TODO() Chnages
         return START_STICKY
     }
 
@@ -101,25 +102,26 @@ class UserHouseTrackingService : Service() {
 
     private suspend fun latLngApiCall(lat: Double, lng: Double, radius: Int) {
         val geofencingRepository: GeofencingRepository by lazy { getKoin().get() }
-
         try {
             val response = geofencingRepository.getCensusSubmissions(lat, lng, radius)
-            response.forEach { item ->
-                val key = item._id
-                val locationAnswer = item.location_answer
-                val coordinates = locationAnswer.coordinates
-
-                val location = Location("").apply {
-                    latitude = coordinates[0]
-                    longitude = coordinates[1]
+            val requestIds = response.map { loc -> loc._id }
+            val geofenceLocations = response.map { loc ->
+                Location("").apply {
+                    latitude = loc.location_answer.coordinates[1]
+                    longitude = loc.location_answer.coordinates[0]
+                    //println("type: ${loc._id}, location: ${loc.location_answer.coordinates}")
+                    Log.e("CLient","$latitude, $longitude")
                 }
-                geofenceManagerClient.addGeofence(
-                    key = key,
-                    location = location,
-                    radiusInMeters = GEOFENCE_RADIUS
-                )
-                println("type: ${item.location_answer}, location: ${item.location_answer.coordinates}")
             }
+
+            geofenceManagerClient.addGeofences(
+                requestIds = requestIds,
+                locations = geofenceLocations,
+                radiusInMeters = GEOFENCE_RADIUS
+            )
+            println("Geolocations: $geofenceLocations")
+            geofenceManagerClient.registerGeofence()
+
         } catch (e: Exception) {
             e.printStackTrace()
         }
