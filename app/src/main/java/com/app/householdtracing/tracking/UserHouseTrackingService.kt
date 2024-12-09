@@ -8,16 +8,17 @@ import android.location.Location
 import android.os.Binder
 import android.os.Build
 import android.os.IBinder
-import android.util.Log
-import com.app.householdtracing.data.datastore.PreferencesManager
+import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.data.repositoryImpl.GeofencingRepository
+import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
 import com.app.householdtracing.location.GeofenceManagerClient
 import com.app.householdtracing.util.AppNotificationManager
 import com.app.householdtracing.util.AppUtil.GEOFENCE_RADIUS
 import com.app.householdtracing.util.AppUtil.RADIUS
+import com.app.householdtracing.util.AppUtil.isWithinGeofence
+import com.app.householdtracing.util.AppUtil.saveGeofence
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.app.householdtracing.util.FusedLocationProvider
-import com.app.householdtracing.worker.SunriseTrackingWorker
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -29,17 +30,14 @@ import org.koin.java.KoinJavaComponent.getKoin
 
 class UserHouseTrackingService : Service() {
 
+    val context = this
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val binder = LocalBinder()
     private val notificationManager by lazy { AppNotificationManager(this) }
-    private val geofenceManagerClient by lazy {
-        GeofenceManagerClient(this)
-    }
-    private val userActivityTransitionManager by lazy {
-        UserActivityTransitionManager(this)
-    }
-
+    private val geofenceManagerClient by lazy { GeofenceManagerClient(this) }
+    private val userActivityTransitionManager by lazy { UserActivityTransitionManager(this) }
     private val fusedLocationProvider by lazy { FusedLocationProvider(this) }
+    private val userActivityRepository: UserActivityTrackingRepository by lazy { getKoin().get() }
 
     inner class LocalBinder : Binder() {
         val service: UserHouseTrackingService get() = this@UserHouseTrackingService
@@ -56,10 +54,13 @@ class UserHouseTrackingService : Service() {
 //            }
 //        }TODO() Chnages
 
-        currentLocation { location ->
+        currentLocation { currentLoc ->
             scope.launch {
-                showLogError("Location","current: ${location.latitude},${location.longitude}")
-                latLngApiCall(31.5195761, 74.3247801, RADIUS)
+                showLogError(
+                    "$APP_TAG Geofence",
+                    "current: ${currentLoc.latitude},${currentLoc.longitude}"
+                )
+                latLngApiCall(currentLoc.latitude, currentLoc.longitude, RADIUS)
             }
         }
 
@@ -67,7 +68,8 @@ class UserHouseTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundService()
-        //userActivityTransitionManager.registerActivityTransitions()TODO() Chnages
+        trackUserActivityAndLocation()
+        userActivityTransitionManager.registerActivityTransitions()
         return START_STICKY
     }
 
@@ -94,8 +96,9 @@ class UserHouseTrackingService : Service() {
     private inline fun currentLocation(crossinline locationFound: (Location) -> Unit) {
         scope.launch {
             fusedLocationProvider.getCurrentLocation()?.let {
-                showLogError("location", it.longitude.toString())
+                showLogError(APP_TAG, it.longitude.toString())
                 locationFound(it)
+                saveGeofence(it.latitude, it.longitude, GEOFENCE_RADIUS)
             }
         }
     }
@@ -109,8 +112,7 @@ class UserHouseTrackingService : Service() {
                 Location("").apply {
                     latitude = loc.location_answer.coordinates[1]
                     longitude = loc.location_answer.coordinates[0]
-                    //println("type: ${loc._id}, location: ${loc.location_answer.coordinates}")
-                    Log.e("CLient","$latitude, $longitude")
+                    showLogError(APP_TAG, "$latitude, $longitude")
                 }
             }
 
@@ -119,11 +121,48 @@ class UserHouseTrackingService : Service() {
                 locations = geofenceLocations,
                 radiusInMeters = GEOFENCE_RADIUS
             )
-            println("Geolocations: $geofenceLocations")
+            showLogError(APP_TAG, "$geofenceLocations")
             geofenceManagerClient.registerGeofence()
 
         } catch (e: Exception) {
             e.printStackTrace()
         }
     }
+
+    //Recognition Activity
+    private fun trackUserActivityAndLocation() {
+        scope.launch {
+            userActivityRepository.recognitionSharedFlow.collectLatest { event ->
+                userActivityTransitionManager.observeUserActivity(event)
+                notificationManager.setUpNotification(
+                    channelId = AppNotificationManager.TRACKING_NOTIFICATION_CHANNEL_ID,
+                    text = userActivityTransitionManager.getActivityMessage()
+                )
+                when {
+                    userActivityTransitionManager.isInVehicle() -> userActivityTransitionManager.switchToVehicle()
+                    userActivityTransitionManager.isStill() -> userActivityTransitionManager.switchToStill()
+                }
+                checkAndCallApiOnLocationUpdate()
+            }
+        }
+    }
+
+    private fun checkAndCallApiOnLocationUpdate() {
+        currentLocation { newLocation ->
+            scope.launch {
+                isWithinGeofence(context, newLocation).collect { isInside ->
+                    if (!isInside) {
+                        latLngApiCall(newLocation.latitude, newLocation.longitude, RADIUS)
+                        notificationManager.setUpNotification(
+                            "$APP_TAG Geofence",
+                            "Location is outside the geofence."
+                        )
+                    } else {
+                        showLogError("$APP_TAG Geofence", "Location is inside the geofence.")
+                    }
+                }
+            }
+        }
+    }
+
 }

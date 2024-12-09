@@ -6,6 +6,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import com.app.householdtracing.App.Companion.APP_TAG
+import com.app.householdtracing.data.model.ActivityInfo
 import com.app.householdtracing.receiver.ActivityRecognitionReceiver
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.app.householdtracing.util.PermissionUtil
@@ -14,16 +15,87 @@ import com.google.android.gms.location.DetectedActivity
 
 class UserActivityTransitionManager(private val context: Context) {
 
+    private val activityClient = ActivityRecognition.getClient(context)
+    private var currentUserActivityType: Int = DetectedActivity.STILL
+    private var actionCount: Int = 0
+    private fun isConfidenceSatisfied(confidence: Int) = confidence > 70
+    private fun isConsecutiveCountMet() = actionCount > 3
+    private fun isCurrentActivity(type: Int) = type == currentUserActivityType
+    private var isUserInStillStateInitially: Boolean = false
+
     companion object {
 
         const val KEY_DATA = "DATA"
         const val INTENT_FILTER_SHOWN = "RECOGNITION"
         const val DETECTION_INTERVAL_IN_MILLISECONDS = (45 * 1000).toLong()
-
     }
 
+    fun observeUserActivity(activityInfo: ActivityInfo) {
+        if (isConfidenceSatisfied(activityInfo.confidenct)) {
+            if (activityInfo.type == DetectedActivity.STILL) {
+                if (!isUserInStillStateInitially) {
+                    isUserInStillStateInitially = true
+                }
+            } else {
+                if (isUserInStillStateInitially) {
+                    isUserInStillStateInitially = false
+                }
+                updateActionCount(activityInfo.type)
+                evaluateActivityState()
+            }
+        }
+    }
 
-    private val activityClient = ActivityRecognition.getClient(context)
+    private fun updateActionCount(detectedType: Int) {
+        actionCount = if (detectedType == currentUserActivityType) actionCount + 1 else 0
+    }
+
+    private fun evaluateActivityState() {
+        if (isConsecutiveCountMet()) {
+            when (currentUserActivityType) {
+                DetectedActivity.IN_VEHICLE -> switchToStill()
+                DetectedActivity.STILL -> switchToVehicle()
+                else -> Unit
+            }
+        }
+    }
+
+    fun switchToStill() {
+        resetActionCount()
+        currentUserActivityType = DetectedActivity.STILL
+        isUserInStillStateInitially = false
+    }
+
+    fun switchToVehicle() {
+        resetActionCount()
+        currentUserActivityType = DetectedActivity.IN_VEHICLE
+    }
+
+    private fun resetActionCount() {
+        actionCount = 0
+    }
+
+    fun isInVehicle(): Boolean =
+        isConsecutiveCountMet() && isCurrentActivity(DetectedActivity.IN_VEHICLE)
+
+    fun isStill(): Boolean = isConsecutiveCountMet() && isCurrentActivity(DetectedActivity.STILL)
+
+    fun getActivityMessage(): String = when (currentUserActivityType) {
+
+        DetectedActivity.IN_VEHICLE -> if (isInVehicle()) {
+            "User is in Vehicle Now"
+        } else {
+            "Detecting User is in Vehicle"
+        }
+
+        DetectedActivity.STILL -> if (isStill()) {
+            "User is Still Now"
+        } else {
+            "Detecting User is Still"
+        }
+
+        else -> "Current user None activity"
+    }
 
     fun getActivityType(int: Int): String {
         return when (int) {

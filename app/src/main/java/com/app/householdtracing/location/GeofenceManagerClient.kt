@@ -6,16 +6,16 @@ import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Build
+import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.receiver.GeofenceBroadcastReceiver
+import com.app.householdtracing.util.AppUtil.showLogError
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_ENTER
 import com.google.android.gms.location.Geofence.GEOFENCE_TRANSITION_EXIT
 import com.google.android.gms.location.GeofencingRequest
 import com.google.android.gms.location.LocationServices
-import timber.log.Timber
 
 class GeofenceManagerClient(private val context: Context) {
-    private val TAG = "GeofenceManagerClient"
     private val client = LocationServices.getGeofencingClient(context)
     private val geofenceList = mutableListOf<Geofence>()
 
@@ -50,29 +50,34 @@ class GeofenceManagerClient(private val context: Context) {
         }
 
         val geofence = createGeofence("maja_rica", Location("").apply {
-           latitude = 31.518693
+            latitude = 31.518693
             longitude = 74.323877
         }, radiusInMeters)
         geofenceList.add(geofence)
 
-      /*  requestIds.zip(locations).forEachIndexed { index, (requestId, location) ->
-            val geofence = createGeofence("item_$index", location, radiusInMeters)
-            geofenceList.add(geofence)
-        }*/
+        /*  requestIds.zip(locations).forEachIndexed { index, (requestId, location) ->
+              val geofence = createGeofence("item_$index", location, radiusInMeters)
+              geofenceList.add(geofence)
+          }*/
     }
 
     @SuppressLint("MissingPermission")
     fun registerGeofence() {
         if (geofenceList.isEmpty()) {
-            Timber.tag(TAG).d("registerGeofence: No geofences to register.")
+            showLogError(
+                "$APP_TAG GeoFenceManagerClient",
+                "registerGeofence: No geofences to register."
+            )
             return
         }
 
         client.addGeofences(createGeofencingRequest(), geofencingPendingIntent).run {
             addOnSuccessListener {
-                Timber.tag(TAG).d("registerGeofence: SUCCESS")
+                showLogError("$APP_TAG GeoFenceManagerClient", "registerGeofence: SUCCESS")
             }.addOnFailureListener { exception ->
-                Timber.tag(TAG).d("registerGeofence: Failure\n$exception")
+                showLogError(
+                    "$APP_TAG GeoFenceManagerClient", "registerGeofence: Failure\n$exception"
+                )
             }
         }
     }
@@ -80,7 +85,7 @@ class GeofenceManagerClient(private val context: Context) {
     fun deregisterGeofence() {
         client.removeGeofences(geofencingPendingIntent)
         geofenceList.clear()
-        Timber.tag(TAG).d("deregisterGeofence: All geofences removed.")
+        showLogError("$APP_TAG GeoFenceManagerClient", "deregisterGeofence: All geofence removed.")
     }
 
     private fun createGeofencingRequest(): GeofencingRequest {

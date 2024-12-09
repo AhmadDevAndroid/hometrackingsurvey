@@ -1,7 +1,6 @@
 package com.app.householdtracing.di
 
 import android.app.Application
-import android.content.Context
 import androidx.datastore.core.CorruptionException
 import androidx.datastore.core.DataStoreFactory
 import androidx.datastore.core.Serializer
@@ -14,7 +13,9 @@ import com.app.householdtracing.data.db.DB_NAME
 import com.app.householdtracing.data.repositoryImpl.AuthRepositoryImpl
 import com.app.householdtracing.data.repositoryImpl.GeofencingRepository
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
+import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
 import com.app.householdtracing.network.services.HouseHoldApiService
+import com.app.householdtracing.tracking.UserActivityTransitionManager
 import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
@@ -28,7 +29,6 @@ import java.io.OutputStream
 import java.util.concurrent.TimeUnit
 
 val appModule = module {
-    val context: Context
 
     single {
         HttpLoggingInterceptor().apply {
@@ -62,14 +62,14 @@ val appModule = module {
 
     viewModel { LoginScreenViewModel(get()) }
 
-
-
     single {
         DataStoreFactory.create(
             serializer = UserSerializer,
             produceFile = { File(get<Application>().filesDir, "user.pb") }
         )
     }
+
+    single { UserActivityTransitionManager(get()) }
 
 }
 
@@ -92,4 +92,5 @@ val repositoryModule = module {
     single { SunriseRepositoryImpl(get(), get()) }
     single { AuthRepositoryImpl(get(), get()) }
     single { GeofencingRepository(get()) }
+    single { UserActivityTrackingRepository() }
 }

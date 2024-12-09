@@ -11,6 +11,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.data.datastore.PreferencesManager
 import com.app.householdtracing.data.model.HomeTrackingLocations
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
@@ -38,7 +39,6 @@ class HomeLocationTrackingWorker(
     }
 
     companion object {
-        private const val TAG = "HomeLocationTrackingWorker"
         private const val LOCATION_LIMIT = 9
         private const val TIME_KEY = "time"
         const val DISTANCE_THRESHOLD = 50
@@ -55,13 +55,13 @@ class HomeLocationTrackingWorker(
                 .build()
 
             WorkManager.getInstance(context)
-                .enqueueUniqueWork(TAG, ExistingWorkPolicy.KEEP, request)
+                .enqueueUniqueWork(APP_TAG, ExistingWorkPolicy.KEEP, request)
         }
     }
 
     override suspend fun doWork(): Result {
         if (!canInsertLocation()) {
-            showLogError(TAG, "Location limit reached or conditions not met!")
+            showLogError(APP_TAG, "Location limit reached or conditions not met!")
             return Result.success()
         }
 
@@ -142,7 +142,7 @@ class HomeLocationTrackingWorker(
                 longitude = savedLocation.longitude
             }
             val distance = referenceLocation.distanceTo(savedLocationAsObject)
-            showLogError("Distance Check", "Distance: $distance meters")
+            showLogError(APP_TAG, "Distance: $distance meters")
             if (distance > DISTANCE_THRESHOLD) return false
         }
         return true
@@ -150,7 +150,7 @@ class HomeLocationTrackingWorker(
 
     private suspend fun saveLocationInfo(it: Location) {
         PreferencesManager.putValue(PreferencesManager.isLocationFound, true)
-        PreferencesManager.putValue(PreferencesManager.latitude, it.longitude)
-        PreferencesManager.putValue(PreferencesManager.longitude, it.longitude)
+        PreferencesManager.putValue(PreferencesManager.LATITUDE, it.latitude)
+        PreferencesManager.putValue(PreferencesManager.LONGITUDE, it.longitude)
     }
 }

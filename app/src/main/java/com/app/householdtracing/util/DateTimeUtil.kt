@@ -1,5 +1,6 @@
 package com.app.householdtracing.util
 
+import com.app.householdtracing.App.Companion.APP_TAG
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -50,26 +51,17 @@ object DateUtil {
     fun nextAlarmTimes(sunriseCalendar: Calendar, currentTimeInMillis: Long): List<Long> {
         val availableTime = sunriseCalendar.timeInMillis - currentTimeInMillis
         val alarmTimes = mutableListOf<Long>()
-        AppUtil.showLogError("Next Alarm Calculation", "Current Time: $currentTimeInMillis")
-        AppUtil.showLogError(
-            "Next Alarm Calculation",
-            "Sunrise Time: ${sunriseCalendar.timeInMillis}"
-        )
-        AppUtil.showLogError(
-            "Next Alarm Calculation",
-            "Available Time: $availableTime milliseconds"
-        )
+        AppUtil.showLogError(APP_TAG, "Current Time: $currentTimeInMillis")
+        AppUtil.showLogError(APP_TAG, "Sunrise Time: ${sunriseCalendar.timeInMillis}")
+        AppUtil.showLogError(APP_TAG, "Available Time: $availableTime milliseconds")
         // Schedule alarms for next day
         if (availableTime < FOUR_AND_HALF_HOURS_IN_MILLISECONDS) {
             sunriseCalendar.add(Calendar.DATE, 1)
             AppUtil.showLogError(
-                "Next Alarm Calculation",
+                APP_TAG,
                 "Insufficient time for alarms today. Scheduling for the next day."
             )
-            AppUtil.showLogError(
-                "Next Alarm Calculation",
-                "New Sunrise Time: ${sunriseCalendar.timeInMillis}"
-            )
+            AppUtil.showLogError(APP_TAG, "New Sunrise Time: ${sunriseCalendar.timeInMillis}")
         }
 
         // Schedule alarms if enough time left before sunrise
@@ -94,10 +86,7 @@ object DateUtil {
             }
 
             else -> {
-                AppUtil.showLogError(
-                    "Next Alarm Calculation",
-                    "No sufficient time for alarms today."
-                )
+                AppUtil.showLogError(APP_TAG, "No sufficient time for alarms today.")
             }
         }
 

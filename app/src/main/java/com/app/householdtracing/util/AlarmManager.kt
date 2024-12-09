@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import com.app.householdtracing.App
+import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.receiver.AlarmReceiver
 import com.app.householdtracing.util.AppUtil.showLogError
 
@@ -19,7 +20,7 @@ class AlarmManager(private val context: Context = App.getInstance()) {
     @SuppressLint("MissingPermission")
     fun scheduleNextAlarmTime(triggerTime: Long, sunriseTimeInMilliSeconds: Long) {
 
-        showLogError("Tracking schedule Time", "$triggerTime && $sunriseTimeInMilliSeconds")
+        showLogError(APP_TAG, "$triggerTime && $sunriseTimeInMilliSeconds")
 
         val context = App.getInstance()
         val intent = Intent(context, AlarmReceiver::class.java).apply {

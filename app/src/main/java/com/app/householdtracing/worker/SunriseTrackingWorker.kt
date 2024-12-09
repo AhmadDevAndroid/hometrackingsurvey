@@ -9,6 +9,7 @@ import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.OutOfQuotaPolicy
 import androidx.work.WorkManager
 import androidx.work.WorkerParameters
+import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.data.datastore.PreferencesManager
 import com.app.householdtracing.data.model.responsedto.SunriseResponseBody.SunriseResults
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
@@ -36,8 +37,6 @@ class SunriseTrackingWorker(
     private val alarmManager: AlarmManager by lazy { AlarmManager(context) }
 
     companion object {
-        private const val TAG = "SunriseTrackingWorker"
-
         fun configureWorker(context: Context) {
             val oneTimeRequest = OneTimeWorkRequestBuilder<SunriseTrackingWorker>()
                 .setConstraints(Constraints.NONE)
@@ -45,7 +44,7 @@ class SunriseTrackingWorker(
                 .build()
 
             WorkManager.getInstance(context).enqueueUniqueWork(
-                TAG,
+                APP_TAG,
                 ExistingWorkPolicy.KEEP,
                 oneTimeRequest
             )
@@ -69,7 +68,7 @@ class SunriseTrackingWorker(
     private suspend fun fetchAndProcessSunriseData(): Result {
         val location = fusedLocationProvider.getCurrentLocation()
         if (location == null) {
-            Timber.tag(TAG).e("Failed to fetch location")
+            Timber.tag(APP_TAG).e("Failed to fetch location")
             notificationManager.setUpNotification("Location Error", "Failed to fetch location")
             return Result.retry()
         }
@@ -87,7 +86,7 @@ class SunriseTrackingWorker(
             }
 
             else -> {
-                Timber.tag(TAG).e("Failed to fetch sunrise data")
+                Timber.tag(APP_TAG).e("Failed to fetch sunrise data")
                 notificationManager.setUpNotification("API Error", "Failed to fetch sunrise data")
                 Result.retry()
             }
@@ -100,7 +99,7 @@ class SunriseTrackingWorker(
         //val tenMinutesLater = currentTimeInMillis + 10 * 60 * 1000
         val calendar = Calendar.getInstance()
         if (sunriseTime <= 0) {
-            Timber.tag(TAG).e("Invalid sunrise time")
+            Timber.tag(APP_TAG).e("Invalid sunrise time")
             return
         }
 
