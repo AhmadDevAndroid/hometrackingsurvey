@@ -48,17 +48,10 @@ class GeofenceManagerClient(private val context: Context) {
         if (requestIds.size != locations.size) {
             throw IllegalArgumentException("The number of requestIds must match the number of locations")
         }
-
-        val geofence = createGeofence("maja_rica", Location("").apply {
-            latitude = 31.518693
-            longitude = 74.323877
-        }, radiusInMeters)
-        geofenceList.add(geofence)
-
-        /*  requestIds.zip(locations).forEachIndexed { index, (requestId, location) ->
-              val geofence = createGeofence("item_$index", location, radiusInMeters)
-              geofenceList.add(geofence)
-          }*/
+        requestIds.zip(locations).forEachIndexed { _, (requestId, location) ->
+            val geofence = createGeofence(requestId, location, radiusInMeters)
+            geofenceList.add(geofence)
+        }
     }
 
     @SuppressLint("MissingPermission")

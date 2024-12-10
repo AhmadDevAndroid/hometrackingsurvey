@@ -53,22 +53,20 @@ class UserActivityTransitionManager(private val context: Context) {
     private fun evaluateActivityState() {
         if (isConsecutiveCountMet()) {
             when (currentUserActivityType) {
-                DetectedActivity.IN_VEHICLE -> switchToStill()
-                DetectedActivity.STILL -> switchToVehicle()
+                DetectedActivity.IN_VEHICLE -> switchToActivity(DetectedActivity.IN_VEHICLE)
+                DetectedActivity.ON_FOOT, DetectedActivity.WALKING, DetectedActivity.RUNNING ->
+                    switchToActivity(DetectedActivity.ON_FOOT)
+
+                DetectedActivity.STILL -> switchToActivity(DetectedActivity.STILL)
                 else -> Unit
             }
         }
     }
 
-    fun switchToStill() {
+    fun switchToActivity(activityType: Int, isInitialStill: Boolean = false) {
         resetActionCount()
-        currentUserActivityType = DetectedActivity.STILL
-        isUserInStillStateInitially = false
-    }
-
-    fun switchToVehicle() {
-        resetActionCount()
-        currentUserActivityType = DetectedActivity.IN_VEHICLE
+        currentUserActivityType = activityType
+        isUserInStillStateInitially = isInitialStill
     }
 
     private fun resetActionCount() {
@@ -78,6 +76,7 @@ class UserActivityTransitionManager(private val context: Context) {
     fun isInVehicle(): Boolean =
         isConsecutiveCountMet() && isCurrentActivity(DetectedActivity.IN_VEHICLE)
 
+    fun isOnFoot() = isConsecutiveCountMet() && isCurrentActivity(DetectedActivity.ON_FOOT)
     fun isStill(): Boolean = isConsecutiveCountMet() && isCurrentActivity(DetectedActivity.STILL)
 
     fun getActivityMessage(): String = when (currentUserActivityType) {
@@ -86,6 +85,12 @@ class UserActivityTransitionManager(private val context: Context) {
             "User is in Vehicle Now"
         } else {
             "Detecting User is in Vehicle"
+        }
+
+        DetectedActivity.ON_FOOT -> if (isOnFoot()) {
+            "User is on Foot Now"
+        } else {
+            "Detecting User is on Foot"
         }
 
         DetectedActivity.STILL -> if (isStill()) {

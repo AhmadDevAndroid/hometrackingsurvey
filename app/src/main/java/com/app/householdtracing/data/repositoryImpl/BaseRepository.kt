@@ -20,7 +20,6 @@ abstract class BaseRepository {
             Resource.error(getErrorMessage(e), throwable = e)
         }
     }
-
 }
 
 fun getErrorMessage(it: Throwable): String {

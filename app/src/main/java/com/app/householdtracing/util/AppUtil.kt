@@ -71,7 +71,7 @@ object AppUtil {
         }
     }
 
-    fun isWithinGeofence(context: Context, newLocation: Location): Flow<Boolean> {
+    fun isWithinGeofence(newLocation: Location): Flow<Boolean> {
         return getGeofence().map { (savedLat, savedLng, radius) ->
             if (savedLat == 0.0 && savedLng == 0.0) {
                 false

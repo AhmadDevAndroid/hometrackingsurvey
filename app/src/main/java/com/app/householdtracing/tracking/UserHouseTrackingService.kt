@@ -19,6 +19,7 @@ import com.app.householdtracing.util.AppUtil.isWithinGeofence
 import com.app.householdtracing.util.AppUtil.saveGeofence
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.app.householdtracing.util.FusedLocationProvider
+import com.google.android.gms.location.DetectedActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -30,7 +31,6 @@ import org.koin.java.KoinJavaComponent.getKoin
 
 class UserHouseTrackingService : Service() {
 
-    val context = this
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val binder = LocalBinder()
     private val notificationManager by lazy { AppNotificationManager(this) }
@@ -139,8 +139,18 @@ class UserHouseTrackingService : Service() {
                     text = userActivityTransitionManager.getActivityMessage()
                 )
                 when {
-                    userActivityTransitionManager.isInVehicle() -> userActivityTransitionManager.switchToVehicle()
-                    userActivityTransitionManager.isStill() -> userActivityTransitionManager.switchToStill()
+                    userActivityTransitionManager.isInVehicle() -> userActivityTransitionManager.switchToActivity(
+                        DetectedActivity.IN_VEHICLE
+                    )
+
+                    userActivityTransitionManager.isOnFoot() -> userActivityTransitionManager.switchToActivity(
+                        DetectedActivity.ON_FOOT
+                    )
+
+                    userActivityTransitionManager.isStill() -> userActivityTransitionManager.switchToActivity(
+                        DetectedActivity.STILL,
+                        true
+                    )
                 }
                 checkAndCallApiOnLocationUpdate()
             }
@@ -150,7 +160,7 @@ class UserHouseTrackingService : Service() {
     private fun checkAndCallApiOnLocationUpdate() {
         currentLocation { newLocation ->
             scope.launch {
-                isWithinGeofence(context, newLocation).collect { isInside ->
+                isWithinGeofence(newLocation).collect { isInside ->
                     if (!isInside) {
                         latLngApiCall(newLocation.latitude, newLocation.longitude, RADIUS)
                         notificationManager.setUpNotification(

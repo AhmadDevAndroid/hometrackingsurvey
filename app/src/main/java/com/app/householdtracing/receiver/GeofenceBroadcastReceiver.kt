@@ -6,6 +6,7 @@ import android.content.Intent
 import com.app.householdtracing.App.Companion.APP_TAG
 import com.app.householdtracing.util.AppNotificationManager
 import com.app.householdtracing.util.AppUtil.showLogError
+import com.app.householdtracing.util.AppUtil.showToastMsg
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
@@ -14,6 +15,8 @@ import com.google.android.gms.location.GeofencingEvent
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
+        showLogError("$APP_TAG GeoFenceReceiver", "onReceive triggered")
+        showToastMsg("GeoFenceReceiver")
         val notificationManager by lazy { AppNotificationManager(context) }
         notificationManager.setUpNotification("GeoFence rece", "onreceive")
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
