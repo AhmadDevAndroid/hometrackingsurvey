@@ -9,14 +9,17 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import com.app.householdtracing.App.Companion.APP_TAG
+import com.app.householdtracing.data.datastore.PreferencesManager
+import com.app.householdtracing.data.datastore.PreferencesManager.LAST_API_LAT
+import com.app.householdtracing.data.datastore.PreferencesManager.LAST_API_LNG
+import com.app.householdtracing.data.model.GeofenceLocation
 import com.app.householdtracing.data.repositoryImpl.GeofencingRepository
 import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
 import com.app.householdtracing.location.GeofenceManagerClient
 import com.app.householdtracing.util.AppNotificationManager
 import com.app.householdtracing.util.AppUtil.GEOFENCE_RADIUS
 import com.app.householdtracing.util.AppUtil.RADIUS
-import com.app.householdtracing.util.AppUtil.isWithinGeofence
-import com.app.householdtracing.util.AppUtil.saveGeofence
+import com.app.householdtracing.util.AppUtil.distanceBetween
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.app.householdtracing.util.FusedLocationProvider
 import com.google.android.gms.location.DetectedActivity
@@ -25,6 +28,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 
@@ -38,6 +42,8 @@ class UserHouseTrackingService : Service() {
     private val userActivityTransitionManager by lazy { UserActivityTransitionManager(this) }
     private val fusedLocationProvider by lazy { FusedLocationProvider(this) }
     private val userActivityRepository: UserActivityTrackingRepository by lazy { getKoin().get() }
+    private var currentGeofence: MutableList<GeofenceLocation> = mutableListOf()
+    private var allApiRecords: MutableList<GeofenceLocation> = mutableListOf()
 
     inner class LocalBinder : Binder() {
         val service: UserHouseTrackingService get() = this@UserHouseTrackingService
@@ -60,7 +66,7 @@ class UserHouseTrackingService : Service() {
                     "$APP_TAG Geofence",
                     "current: ${currentLoc.latitude},${currentLoc.longitude}"
                 )
-                latLngApiCall(currentLoc.latitude, currentLoc.longitude, RADIUS)
+                callApiAndRegisterGeofence(currentLoc)
             }
         }
 
@@ -68,8 +74,8 @@ class UserHouseTrackingService : Service() {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         startForegroundService()
-        trackUserActivityAndLocation()
         userActivityTransitionManager.registerActivityTransitions()
+        trackUserActivityAndLocation()
         return START_STICKY
     }
 
@@ -89,7 +95,6 @@ class UserHouseTrackingService : Service() {
     override fun onDestroy() {
         super.onDestroy()
         userActivityTransitionManager.deregisterActivityTransitions()
-        geofenceManagerClient.deregisterGeofence()
         scope.cancel()
     }
 
@@ -98,32 +103,29 @@ class UserHouseTrackingService : Service() {
             fusedLocationProvider.getCurrentLocation()?.let {
                 showLogError(APP_TAG, it.longitude.toString())
                 locationFound(it)
-                saveGeofence(it.latitude, it.longitude, GEOFENCE_RADIUS)
+                PreferencesManager.putValue(LAST_API_LAT, it.latitude)
+                PreferencesManager.putValue(LAST_API_LNG, it.longitude)
             }
         }
     }
 
-    private suspend fun latLngApiCall(lat: Double, lng: Double, radius: Int) {
-        val geofencingRepository: GeofencingRepository by lazy { getKoin().get() }
+    private suspend fun callApiAndRegisterGeofence(currentLoc: Location) {
         try {
-            val response = geofencingRepository.getCensusSubmissions(lat, lng, radius)
-            val requestIds = response.map { loc -> loc._id }
-            val geofenceLocations = response.map { loc ->
-                Location("").apply {
-                    latitude = loc.location_answer.coordinates[1]
-                    longitude = loc.location_answer.coordinates[0]
-                    showLogError(APP_TAG, "$latitude, $longitude")
-                }
-            }
-
-            geofenceManagerClient.addGeofences(
-                requestIds = requestIds,
-                locations = geofenceLocations,
-                radiusInMeters = GEOFENCE_RADIUS
+            val response = getKoin().get<GeofencingRepository>().getCensusSubmissions(
+                currentLoc.latitude, currentLoc.longitude, RADIUS
             )
-            showLogError(APP_TAG, "$geofenceLocations")
-            geofenceManagerClient.registerGeofence()
 
+            allApiRecords = response.map { loc ->
+                GeofenceLocation(
+                    loc._id,
+                    loc.location_answer.coordinates[1],
+                    loc.location_answer.coordinates[0]
+                )
+            }.toMutableList()
+            notificationManager.setUpNotification(APP_TAG, "Total Shops : ${allApiRecords.size}")
+            currentGeofence =
+                allApiRecords.sortedBy { it.distanceTo(currentLoc) }.take(100).toMutableList()
+            createGeofence(currentGeofence)
         } catch (e: Exception) {
             e.printStackTrace()
         }
@@ -132,12 +134,9 @@ class UserHouseTrackingService : Service() {
     //Recognition Activity
     private fun trackUserActivityAndLocation() {
         scope.launch {
+            showLogError("$APP_TAG Service", "trackUserActivityAndLocation called")
             userActivityRepository.recognitionSharedFlow.collectLatest { event ->
                 userActivityTransitionManager.observeUserActivity(event)
-                notificationManager.setUpNotification(
-                    channelId = AppNotificationManager.TRACKING_NOTIFICATION_CHANNEL_ID,
-                    text = userActivityTransitionManager.getActivityMessage()
-                )
                 when {
                     userActivityTransitionManager.isInVehicle() -> userActivityTransitionManager.switchToActivity(
                         DetectedActivity.IN_VEHICLE
@@ -152,27 +151,66 @@ class UserHouseTrackingService : Service() {
                         true
                     )
                 }
-                checkAndCallApiOnLocationUpdate()
+                notificationManager.setUpNotification(
+                    channelId = AppNotificationManager.TRACKING_NOTIFICATION_CHANNEL_ID,
+                    text = userActivityTransitionManager.getActivityMessage()
+                )
+                checkAndUpdateGeofence()
             }
         }
     }
 
-    private fun checkAndCallApiOnLocationUpdate() {
+    private fun checkAndUpdateGeofence() {
         currentLocation { newLocation ->
             scope.launch {
-                isWithinGeofence(newLocation).collect { isInside ->
-                    if (!isInside) {
-                        latLngApiCall(newLocation.latitude, newLocation.longitude, RADIUS)
-                        notificationManager.setUpNotification(
-                            "$APP_TAG Geofence",
-                            "Location is outside the geofence."
-                        )
-                    } else {
-                        showLogError("$APP_TAG Geofence", "Location is inside the geofence.")
-                    }
+                val lastApiLat = PreferencesManager.getValue(LAST_API_LAT, 0.0).first()
+                val lastApiLng = PreferencesManager.getValue(LAST_API_LNG, 0.0).first()
+                val distance = distanceBetween(
+                    lastApiLat,
+                    lastApiLng,
+                    newLocation.latitude,
+                    newLocation.longitude
+                )
+                showLogError(
+                    "$APP_TAG Geofence",
+                    "New Location: ${newLocation.latitude}, ${newLocation.longitude} | " +
+                            "Last API Location: $lastApiLat, $lastApiLng | Distance: $distance"
+                )
+                if (distance > RADIUS) {
+                    PreferencesManager.putValue(LAST_API_LAT, newLocation.latitude)
+                    PreferencesManager.putValue(LAST_API_LNG, newLocation.longitude)
+                    showLogError("$APP_TAG Geofence", "Outside radius. Calling API...")
+                    callApiAndRegisterGeofence(newLocation)
+                    notificationManager.setUpNotification(
+                        APP_TAG,
+                        "Total Shops 2: ${allApiRecords.size}"
+                    )
+                } else {
+                    showLogError("$APP_TAG Geofence", "Inside radius. Updating geofences...")
+                    updateNearestGeofences(newLocation)
                 }
             }
         }
+    }
+
+    private fun updateNearestGeofences(newLocation: Location) {
+        currentGeofence =
+            allApiRecords.sortedBy { it.distanceTo(newLocation) }.take(100).toMutableList()
+        createGeofence(currentGeofence)
+    }
+
+    private fun createGeofence(geofenceLocations: List<GeofenceLocation>) {
+        geofenceManagerClient.deregisterGeofence()
+        geofenceManagerClient.addGeofence(
+            requestIds = geofenceLocations.map { it.id },
+            locations = geofenceLocations.map {
+                Location("").apply {
+                    latitude = it.latitude; longitude = it.longitude
+                }
+            },
+            radiusInMeters = GEOFENCE_RADIUS
+        )
+        geofenceManagerClient.registerGeofence()
     }
 
 }

@@ -15,10 +15,7 @@ import com.google.android.gms.location.GeofencingEvent
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
     override fun onReceive(context: Context, intent: Intent) {
-        showLogError("$APP_TAG GeoFenceReceiver", "onReceive triggered")
-        showToastMsg("GeoFenceReceiver")
         val notificationManager by lazy { AppNotificationManager(context) }
-        notificationManager.setUpNotification("GeoFence rece", "onreceive")
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent?.hasError() == true) {
             val errorMessage = GeofenceStatusCodes
@@ -26,24 +23,26 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             showLogError("$APP_TAG GeoFenceReceiver", errorMessage)
             return
         }
+        val transationType = geofencingEvent?.geofenceTransition
+        val currentTime = System.currentTimeMillis()
         // Get the transition type
-        when (geofencingEvent?.geofenceTransition) {
+        when (transationType) {
 
             Geofence.GEOFENCE_TRANSITION_ENTER -> {
                 geofencingEvent.triggeringGeofences?.forEach { item ->
                     item.requestId
-                    showLogError("$APP_TAG GeoFenceReceiver", "Enter ID: ${item.requestId}")
+                    showLogError("$APP_TAG GeoFenceReceiver", "Enter ID: ${item.requestId} at $currentTime")
                 }
-                notificationManager.setUpNotification("GeoFence Enter", "Enter")
+                notificationManager.setUpNotification("GeoFence Enter", "Enter at $currentTime")
             }
 
 
             Geofence.GEOFENCE_TRANSITION_EXIT -> {
                 geofencingEvent.triggeringGeofences?.forEach { item ->
                     item.requestId
-                    showLogError("$APP_TAG GeoFenceReceiver", "Exit requestId: ${item.requestId}")
+                    showLogError("$APP_TAG GeoFenceReceiver", "Exit requestId: ${item.requestId} at $currentTime")
                 }
-                notificationManager.setUpNotification("GeoFence Exit", "Exit")
+                notificationManager.setUpNotification("GeoFence Exit", "Exit at $currentTime")
             }
 
             else -> {

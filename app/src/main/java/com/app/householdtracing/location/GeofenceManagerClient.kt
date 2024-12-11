@@ -40,7 +40,7 @@ class GeofenceManagerClient(private val context: Context) {
         )
     }
 
-    fun addGeofences(
+    fun addGeofence(
         requestIds: List<String>,
         locations: List<Location>,
         radiusInMeters: Float

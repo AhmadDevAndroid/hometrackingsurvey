@@ -20,7 +20,6 @@ object DateUtil {
 //    private const val THREE_HOURS_IN_MILLISECONDS: Long = 6 * 60 * 1000
 //    private const val ONE_HOUR_AND_HALF_IN_MILLISECONDS: Long = 2 * 60 * 1000
 
-
     fun parseTime(sunrise: String): Long {
         val format = SimpleDateFormat("hh:mm:ss a", Locale.getDefault())
         val date = format.parse(sunrise) ?: return 0L

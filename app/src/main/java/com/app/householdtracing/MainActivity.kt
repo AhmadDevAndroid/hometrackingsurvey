@@ -8,6 +8,7 @@ import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
@@ -37,14 +38,15 @@ class MainActivity : ComponentActivity() {
 fun NavigationHandler() {
     val navController = rememberNavController()
     val loginScreenViewModel: LoginScreenViewModel = koinViewModel()
-
     val loginState by loginScreenViewModel.getUser()
         .collectAsState(initial = LoginResponseBody(token = "initial"))
 
-    val startDestination = when {
-        loginState.token == "initial" -> null
-        loginState.token.isNotEmpty() -> Screen.ShoppingTrip.route
-        else -> Screen.Login.route
+    val startDestination = remember(loginState) {
+        when {
+            loginState.token == "initial" -> null
+            loginState.token.isNotEmpty() -> Screen.ShoppingTripScreen.route
+            else -> Screen.LoginScreen.route
+        }
     }
 
     if (startDestination == null) {
@@ -54,14 +56,18 @@ fun NavigationHandler() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.ShoppingTrip.route
+        startDestination = startDestination
     ) {
-        composable(Screen.Login.route) {
+        composable(Screen.LoginScreen.route) {
             LoginScreen(onLoginClick = {
-                navController.navigate(Screen.ShoppingTrip.route)
+                navController.navigate(Screen.ShoppingTripScreen.route) {
+                    launchSingleTop = true
+                    popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                }
+
             })
         }
-        composable(Screen.ShoppingTrip.route) {
+        composable(Screen.ShoppingTripScreen.route) {
             ShoppingTripScreen(
                 onGrocerMissionClick = {},
                 onTopUpMissionClick = {},

@@ -10,7 +10,7 @@ import kotlinx.coroutines.flow.map
 class AuthRepositoryImpl(private val dataStore: DataStore<LoginResponse>,private val api: HouseHoldApiService) {
     suspend fun authenticate(identifier: String, password: String): Result<LoginResponseBody> {
         return try {
-            val response = api.authenticate(LoginRequestBody(identifier, password))
+            val response = api.authenticate("https://pk-census-conductor.surveyauto.com/api/v1/enumerators/authenticate",LoginRequestBody(identifier, password))
             if (response.isSuccessful && response.body() != null) {
                 saveUser(response.body()!!)
                 Result.success(response.body()!!)
