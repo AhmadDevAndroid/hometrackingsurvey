@@ -165,5 +165,4 @@ class UserActivityTransitionManager(private val context: Context) {
         }
     }
 
-
 }

@@ -8,9 +8,7 @@ import android.os.Parcelable
 import android.widget.Toast
 import com.app.householdtracing.App
 import com.app.householdtracing.App.Companion.APP_TAG
-import com.app.householdtracing.data.datastore.PreferencesManager
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.collectLatest
 import timber.log.Timber
 
 object AppUtil {
