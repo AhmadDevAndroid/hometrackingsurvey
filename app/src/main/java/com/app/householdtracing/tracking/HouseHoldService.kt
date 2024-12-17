@@ -8,8 +8,10 @@ import android.os.Binder
 import android.os.Build
 import android.os.IBinder
 import com.app.householdtracing.App.Companion.APP_TAG
+import com.app.householdtracing.data.model.GeofenceTransitionType
 import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
 import com.app.householdtracing.location.GeofenceManagerClient
+import com.app.householdtracing.sensors.SensorDetectionManager
 import com.app.householdtracing.util.AppNotificationManager
 import com.app.householdtracing.util.AppUtil.showLogError
 import com.google.android.gms.location.DetectedActivity
@@ -22,7 +24,7 @@ import kotlinx.coroutines.launch
 import org.koin.java.KoinJavaComponent.getKoin
 
 
-class UserHouseTrackingService : Service() {
+class HouseHoldService : Service() {
 
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val binder = LocalBinder()
@@ -30,9 +32,10 @@ class UserHouseTrackingService : Service() {
     private val geofenceManagerClient by lazy { GeofenceManagerClient(this) }
     private val userActivityTransitionManager by lazy { UserActivityTransitionManager(this) }
     private val userActivityRepository: UserActivityTrackingRepository by lazy { getKoin().get() }
+    private val sensorDetectionManager by lazy { SensorDetectionManager(this) }
 
     inner class LocalBinder : Binder() {
-        val service: UserHouseTrackingService get() = this@UserHouseTrackingService
+        val service: HouseHoldService get() = this@HouseHoldService
     }
 
     override fun onBind(intent: Intent): IBinder = binder
@@ -42,7 +45,7 @@ class UserHouseTrackingService : Service() {
 
 //        scope.launch {
 //            PreferencesManager.getValue(PreferencesManager.SUNRISE_TIME, 0).collectLatest {
-//                SunriseTrackingWorker.configureWorker(this@UserHouseTrackingService)
+//                SunriseTrackingWorker.configureWorker(this@HouseHoldService)
 //            }
 //        }TODO() Chnages
 
@@ -109,9 +112,36 @@ class UserHouseTrackingService : Service() {
                     text = userActivityTransitionManager.getActivityMessage()
                 )
                 geofenceManagerClient.checkAndUpdateGeofence()
+                observeGeofenceTransitions()
             }
         }
     }
 
+
+    //Geofence Observe Events
+    private fun observeGeofenceTransitions() {
+        scope.launch {
+            userActivityRepository.geofenceEvents.collectLatest { event ->
+                val eventMessage = when (event.type) {
+                    GeofenceTransitionType.ENTER -> {
+                        sensorDetectionManager.startSensorDetection()
+                        "Entered geofence [${event.requestId}] at ${event.timestamp}"
+                    }
+
+                    GeofenceTransitionType.EXIT -> {
+                        sensorDetectionManager.stopSensorDetection()
+                        "Exited geofence [${event.requestId}] at ${event.timestamp}"
+                    }
+                }
+
+                showLogError(APP_TAG, eventMessage)
+
+                notificationManager.setUpNotification(
+                    "GeoFence Event",
+                    eventMessage
+                )
+            }
+        }
+    }
 
 }

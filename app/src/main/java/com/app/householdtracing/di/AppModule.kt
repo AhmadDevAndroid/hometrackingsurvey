@@ -14,7 +14,9 @@ import com.app.householdtracing.data.repositoryImpl.AuthRepositoryImpl
 import com.app.householdtracing.data.repositoryImpl.GeofencingRepository
 import com.app.householdtracing.data.repositoryImpl.SunriseRepositoryImpl
 import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
+import com.app.householdtracing.location.GeofenceManagerClient
 import com.app.householdtracing.network.services.HouseHoldApiService
+import com.app.householdtracing.sensors.SensorDetectionManager
 import com.app.householdtracing.tracking.UserActivityTransitionManager
 import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
 import okhttp3.OkHttpClient
@@ -70,6 +72,8 @@ val appModule = module {
     }
 
     single { UserActivityTransitionManager(get()) }
+    single { GeofenceManagerClient(get()) }
+    single { SensorDetectionManager(get()) }
 
 }
 

@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.app.householdtracing.R
-import com.app.householdtracing.tracking.UserHouseTrackingService
+import com.app.householdtracing.tracking.HouseHoldService
 import com.app.householdtracing.ui.theme.HouseHoldTheme
 import com.app.householdtracing.ui.views.HouseHoldScaffoldBackground
 
@@ -130,7 +130,7 @@ fun TripItem(
 }
 
 private fun startLocationTrackingService(context: Context) {
-    val serviceIntent = Intent(context, UserHouseTrackingService::class.java)
+    val serviceIntent = Intent(context, HouseHoldService::class.java)
     when {
         Build.VERSION.SDK_INT >= Build.VERSION_CODES.O -> {
             context.startForegroundService(serviceIntent)

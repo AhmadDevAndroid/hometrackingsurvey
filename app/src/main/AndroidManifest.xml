@@ -43,7 +43,7 @@
         </activity>
 
         <service
-            android:name=".tracking.UserHouseTrackingService"
+            android:name=".tracking.HouseHoldService"
             android:foregroundServiceType="location" />
 
         <receiver android:name=".receiver.AlarmReceiver" />

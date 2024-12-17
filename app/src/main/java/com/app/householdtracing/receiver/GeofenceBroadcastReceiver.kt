@@ -4,18 +4,26 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import com.app.householdtracing.App.Companion.APP_TAG
-import com.app.householdtracing.util.AppNotificationManager
+import com.app.householdtracing.data.model.GeofenceEvent
+import com.app.householdtracing.data.model.GeofenceTransitionType
+import com.app.householdtracing.data.repositoryImpl.UserActivityTrackingRepository
 import com.app.householdtracing.util.AppUtil.showLogError
-import com.app.householdtracing.util.AppUtil.showToastMsg
+import com.app.householdtracing.util.DateUtil
 import com.google.android.gms.location.Geofence
 import com.google.android.gms.location.GeofenceStatusCodes
 import com.google.android.gms.location.GeofencingEvent
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import org.koin.java.KoinJavaComponent.getKoin
 
 
 class GeofenceBroadcastReceiver : BroadcastReceiver() {
 
+    private val userActivityRepository: UserActivityTrackingRepository by lazy { getKoin().get() }
+    private val scope = CoroutineScope(Dispatchers.IO)
+
     override fun onReceive(context: Context, intent: Intent) {
-        val notificationManager by lazy { AppNotificationManager(context) }
         val geofencingEvent = GeofencingEvent.fromIntent(intent)
         if (geofencingEvent?.hasError() == true) {
             val errorMessage = GeofenceStatusCodes
@@ -23,32 +31,31 @@ class GeofenceBroadcastReceiver : BroadcastReceiver() {
             showLogError("$APP_TAG GeoFenceReceiver", errorMessage)
             return
         }
-        val transationType = geofencingEvent?.geofenceTransition
-        val currentTime = System.currentTimeMillis()
+        val transitionType = geofencingEvent?.geofenceTransition ?: return
+        val triggeringGeofences = geofencingEvent.triggeringGeofences ?: return
+        val currentTime = DateUtil.getHourAndMinute()
+
         // Get the transition type
-        when (transationType) {
+        triggeringGeofences.forEach { geofence ->
+            val event = when (transitionType) {
+                Geofence.GEOFENCE_TRANSITION_ENTER -> GeofenceEvent(
+                    requestId = geofence.requestId,
+                    type = GeofenceTransitionType.ENTER,
+                    timestamp = currentTime
+                )
 
-            Geofence.GEOFENCE_TRANSITION_ENTER -> {
-                geofencingEvent.triggeringGeofences?.forEach { item ->
-                    item.requestId
-                    showLogError("$APP_TAG GeoFenceReceiver", "Enter ID: ${item.requestId} at $currentTime")
-                }
-                notificationManager.setUpNotification("GeoFence Enter", "Enter at $currentTime")
+                Geofence.GEOFENCE_TRANSITION_EXIT -> GeofenceEvent(
+                    requestId = geofence.requestId,
+                    type = GeofenceTransitionType.EXIT,
+                    timestamp = currentTime
+                )
+
+                else -> null
             }
 
-
-            Geofence.GEOFENCE_TRANSITION_EXIT -> {
-                geofencingEvent.triggeringGeofences?.forEach { item ->
-                    item.requestId
-                    showLogError("$APP_TAG GeoFenceReceiver", "Exit requestId: ${item.requestId} at $currentTime")
-                }
-                notificationManager.setUpNotification("GeoFence Exit", "Exit at $currentTime")
-            }
-
-            else -> {
-                showLogError("$APP_TAG GeoFenceReceiver", "Error in setting up the geofence")
+            scope.launch {
+                event?.let { userActivityRepository.postGeofenceEvent(it) }
             }
         }
     }
-
 }

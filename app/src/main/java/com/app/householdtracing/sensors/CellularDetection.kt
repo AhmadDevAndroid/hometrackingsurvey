@@ -12,15 +12,14 @@ import android.telephony.TelephonyManager
 class CellularDetection(private var context: Context) {
 
     private var previousCellID = 0
-    private var currentCellID = 0
-    private var currentCellularSNR = 0f
-    private val cellularSNR =
-        floatArrayOf(0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f)
+    var currentCellID = 0
+    var currentCellularSNR = 0f
+    private val cellularSNR = FloatArray(10) { 0f } // Initialize the array with 10 elements
 
     private var outdoorConfidence = 0f
     private var indoorConfidence = 0f
 
-    private val telephonyManager by lazy {
+    private val telephonyManager: TelephonyManager by lazy {
         context.getSystemService(TELEPHONY_SERVICE) as TelephonyManager
     }
 
@@ -28,78 +27,47 @@ class CellularDetection(private var context: Context) {
     fun inDoorCon() = indoorConfidence
 
     fun confidenceLevelFromCellular() {
-
-        //updateAdapter(Item(title = "cellularSNR ${cellularSNR[9]} - ${cellularSNR[0]}", type = 2))
-
-        var cellularConsistent = true
-        var cellularVariation = 0f
-        if (cellularSNR[0] == 0f) {
-            cellularConsistent = false
-        } else {
-            cellularVariation = cellularSNR[9] - cellularSNR[0]
-            if (cellularVariation > 10) {
-                outdoorConfidence += 6
-            } else if (cellularVariation < -10) {
-                indoorConfidence += 6
+        // If cellularSNR[0] is 0, we assume the signal is inconsistent
+        if (cellularSNR[0] != 0f) {
+            val cellularVariation = cellularSNR[9] - cellularSNR[0]
+            when {
+                cellularVariation > 10 -> outdoorConfidence += 6
+                cellularVariation < -10 -> indoorConfidence += 6
             }
         }
     }
 
     @SuppressLint("MissingPermission")
-    fun calculateCeullularInfo() {
-
-        var servingCellTower: String? = null
-
-        val cellInfo = telephonyManager.allCellInfo
-
-        if (cellInfo.isNotEmpty()) {
-            for (i in cellInfo.indices) {
-                if (cellInfo[i].isRegistered) { //current cell tower is the serving cell tower
-                    if (cellInfo[i] is CellInfoWcdma) {
-                        val cellInfoWcdma = cellInfo[i] as CellInfoWcdma
-                        val cellSignalStrengthWcdma = cellInfoWcdma.cellSignalStrength
-                        currentCellID = cellInfoWcdma.cellIdentity.cid
-                        currentCellularSNR = cellSignalStrengthWcdma.dbm.toFloat()
-                        servingCellTower =
-                            "WCDMA cell " + cellInfoWcdma.cellIdentity.cid + "," + cellSignalStrengthWcdma.dbm
-                    } else if (cellInfo[i] is CellInfoGsm) {
-                        val cellInfogsm = cellInfo[i] as CellInfoGsm
-                        val cellSignalStrengthGsm = cellInfogsm.cellSignalStrength
-                        currentCellID = cellInfogsm.cellIdentity.cid
-                        currentCellularSNR = cellSignalStrengthGsm.dbm.toFloat()
-                        servingCellTower =
-                            "GSM cell " + cellInfogsm.cellIdentity.cid + "," + cellSignalStrengthGsm.dbm
-                    } else if (cellInfo[i] is CellInfoLte) {
-                        val cellInfoLte = cellInfo[i] as CellInfoLte
-                        val cellSignalStrengthLte = cellInfoLte.cellSignalStrength
-                        currentCellID = cellInfoLte.cellIdentity.ci
-                        currentCellularSNR = cellSignalStrengthLte.dbm.toFloat()
-                        servingCellTower =
-                            "LTE cell " + cellInfoLte.cellIdentity.ci + "," + cellSignalStrengthLte.dbm
-                    } else if (cellInfo[i] is CellInfoCdma) {
-                        val cellInfoCdma = cellInfo[i] as CellInfoCdma
-                        val cellSignalStrengthCdma = cellInfoCdma.cellSignalStrength
-                        currentCellID = cellInfoCdma.cellIdentity.basestationId
-                        currentCellularSNR = cellSignalStrengthCdma.dbm.toFloat()
-                        servingCellTower =
-                            "CDMA cell " + cellInfoCdma.cellIdentity.basestationId + "," + cellSignalStrengthCdma.dbm
-                    }
-                    if (currentCellID == previousCellID) {
-                        for (j in 0..8) {
-                            cellularSNR[j] = cellularSNR[j + 1]
-                        }
-                        cellularSNR[9] = currentCellularSNR
-                        previousCellID = currentCellID
-                    } else {
-                        for (k in 0..8) {
-                            cellularSNR[k] = 0f
-                        }
-                        cellularSNR[9] = currentCellularSNR
-                        previousCellID = currentCellID
-                    }
-                }
+    fun calculateCellularInfo() {
+        telephonyManager.allCellInfo?.firstOrNull { it.isRegistered }?.let { cellInfo ->
+            val (newCellID, newCellularSNR) = when (cellInfo) {
+                is CellInfoWcdma -> cellInfo.cellSignalStrength.dbm.toFloat() to cellInfo.cellIdentity.cid
+                is CellInfoGsm -> cellInfo.cellSignalStrength.dbm.toFloat() to cellInfo.cellIdentity.cid
+                is CellInfoLte -> cellInfo.cellSignalStrength.dbm.toFloat() to cellInfo.cellIdentity.ci
+                is CellInfoCdma -> cellInfo.cellSignalStrength.dbm.toFloat() to cellInfo.cellIdentity.basestationId
+                else -> return
             }
+
+            // If the cell ID changes, reset the signal strength array
+            if (newCellID.toInt() == previousCellID) {
+                updateCellularSNR(newCellularSNR)
+            } else {
+                resetCellularSNR(newCellularSNR)
+            }
+            previousCellID = newCellID.toInt()
         }
+    }
+
+    private fun updateCellularSNR(newSNR: Int) {
+        for (i in 0 until cellularSNR.size - 1) {
+            cellularSNR[i] = cellularSNR[i + 1]
+        }
+        cellularSNR[9] = newSNR.toFloat()
+    }
+
+    private fun resetCellularSNR(newSNR: Int) {
+        cellularSNR.fill(0f)
+        cellularSNR[9] = newSNR.toFloat()
     }
 
     fun resetConfidence() {
