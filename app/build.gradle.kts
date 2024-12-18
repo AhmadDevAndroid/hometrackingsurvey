@@ -108,6 +108,15 @@ dependencies {
     implementation(libs.navigation.compose)
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.proto.datastore)
+
+    implementation(libs.camera.core)
+    implementation(libs.camera.camera2)
+    implementation(libs.camera.lifecycle)
+    implementation(libs.camera.view)
+    implementation(libs.camera.compose)
+
+    implementation(libs.mlkit.barcode)
+    implementation(libs.mlkit.text)
 }
 
 protobuf {

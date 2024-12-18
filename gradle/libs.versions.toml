@@ -10,8 +10,8 @@ espressoCore = "3.6.1"
 kotlinxCoroutinesPlayServices = "1.7.3"
 lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
-composeBom = "2024.11.00"
-composeNavigation = "2.8.4"
+composeBom = "2024.12.01"
+composeNavigation = "2.8.5"
 serialization = "1.6.3"
 
 play-services = "21.3.0"
@@ -24,7 +24,11 @@ koin = "4.0.0"
 datastore-version = "1.1.1"
 room-db = "2.6.1"
 proto = "0.9.4"
-proto-java = "3.25.0"
+proto-java = "4.26.1"
+
+camerax = "1.4.1"
+mlkit-barcode = "17.3.0"
+mlkit-text-recognition = "16.0.1"
 
 
 [libraries]
@@ -65,6 +69,15 @@ room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "
 room-ksp = { group = "androidx.room", name = "room-compiler", version.ref = "room-db" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
 kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+
+camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
+camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }
+camera-lifecycle = { group = "androidx.camera", name = "camera-lifecycle", version.ref = "camerax" }
+camera-view = { group = "androidx.camera", name = "camera-view", version.ref = "camerax" }
+camera-compose = { group = "androidx.camera", name = "camera-compose", version = "1.5.0-alpha04" }
+
+mlkit-barcode = { group = "com.google.mlkit", name = "barcode-scanning", version.ref = "mlkit-barcode" }
+mlkit-text = { group = "com.google.mlkit", name = "text-recognition", version.ref = "mlkit-text-recognition" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,6 +1,9 @@
 package com.app.householdtracing.util
 
 import android.annotation.SuppressLint
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import android.content.Intent
 import android.location.Location
 import android.os.Build
@@ -54,6 +57,13 @@ object AppUtil {
         val results = FloatArray(1)
         Location.distanceBetween(lat1, lng1, lat2, lng2, results)
         return results[0]
+    }
+
+    fun copyToClipboard(context: Context, label: String, text: String) {
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText(label, text)
+        clipboard.setPrimaryClip(clip)
+        showToastMsg("Copied to clipboard")
     }
 
 }

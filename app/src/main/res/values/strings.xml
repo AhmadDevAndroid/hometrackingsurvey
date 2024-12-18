@@ -33,4 +33,9 @@
     <string name="tv_groceries">Grocery\nMission</string>
     <string name="tv_top_up">Top-up\nMission</string>
     <string name="tv_impulse_purchase">Impulse\nBuying</string>
+
+    <!--Camera Shopping -->
+    <string name="tv_camera_screen_title">Show your\nShopping</string>
+    <string name="tv_scan_product">Scan Your Receipt or QR Code</string>
+    <string name="btn_scan">Scan</string>
 </resources>

@@ -44,7 +44,8 @@ object PermissionUtil {
     fun getPermissionList() = arrayOf(
         Manifest.permission.ACCESS_FINE_LOCATION,
         activityPermission,
-        Manifest.permission.POST_NOTIFICATIONS
+        Manifest.permission.POST_NOTIFICATIONS,
+        Manifest.permission.CAMERA,
     )
 
 
@@ -70,11 +71,12 @@ object PermissionUtil {
         val locationPermission = rememberPermissionState(permission = permissions[0])
         val recognitionPermission = rememberPermissionState(permission = permissions[1])
         val notificationPermission = rememberPermissionState(permission = permissions[2])
+        val cameraPermission = rememberPermissionState(permission = permissions[3])
         val backgroundPermission =
             rememberPermissionState(permission = PermissionUtil.backgroundPermission)
 
         val isAllPermissionGranted =
-            locationPermission.status.isGranted && recognitionPermission.status.isGranted && notificationPermission.status.isGranted
+            locationPermission.status.isGranted && recognitionPermission.status.isGranted && notificationPermission.status.isGranted && cameraPermission.status.isGranted
         val isBackgroundLocationGranted = backgroundPermission.status.isGranted
 
         val launcherMultiplePermissions = rememberLauncherForActivityResult(

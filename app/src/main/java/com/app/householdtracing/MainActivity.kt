@@ -15,6 +15,7 @@ import androidx.navigation.compose.rememberNavController
 import com.app.householdtracing.data.model.responsedto.LoginResponseBody
 import com.app.householdtracing.navigation.Screen
 import com.app.householdtracing.ui.screens.LoginScreen
+import com.app.householdtracing.ui.screens.ShoppingCameraScreen
 import com.app.householdtracing.ui.screens.ShoppingTripScreen
 import com.app.householdtracing.ui.theme.HouseHoldTheme
 import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
@@ -56,7 +57,7 @@ fun NavigationHandler() {
 
     NavHost(
         navController = navController,
-        startDestination = startDestination
+        startDestination = Screen.ShowShoppingCameraScreen.route
     ) {
         composable(Screen.LoginScreen.route) {
             LoginScreen(onLoginClick = {
@@ -69,9 +70,19 @@ fun NavigationHandler() {
         }
         composable(Screen.ShoppingTripScreen.route) {
             ShoppingTripScreen(
-                onGrocerMissionClick = {},
+                onGrocerMissionClick = {
+                    navController.navigate(Screen.ShowShoppingCameraScreen.route)
+                },
                 onTopUpMissionClick = {},
                 onImpulseBuyingMissionClick = {}
+            )
+        }
+
+        composable(Screen.ShowShoppingCameraScreen.route) {
+            ShoppingCameraScreen(
+                onBackClick = {
+                    navController.popBackStack()
+                }
             )
         }
     }
