@@ -34,6 +34,8 @@ object AppUtil {
         else -> @Suppress("DEPRECATION") getParcelableExtra(key) as? T
     }
 
+
+
     @SuppressLint("RestrictedApi")
     suspend fun retryUntilSuccess(
         maxAttempts: Int = MAX_RETRY_ATTEMPTS,

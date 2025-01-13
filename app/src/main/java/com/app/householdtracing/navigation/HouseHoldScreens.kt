@@ -1,8 +1,17 @@
 package com.app.householdtracing.navigation
 
+import kotlinx.serialization.Serializable
 
-sealed class Screen(val route: String) {
-    data object LoginScreen : Screen("LoginScreen")
-    data object ShoppingTripScreen : Screen("ShoppingTripScreen")
-    data object ShowShoppingCameraScreen : Screen("ShowShoppingCameraScreen")
+@Serializable
+sealed class Screens {
+
+    @Serializable
+    data object LoginScreen : Screens()
+
+    @Serializable
+    data object ShoppingTripScreen : Screens()
+
+    @Serializable
+    data object ShowShoppingCameraScreen : Screens()
 }
+

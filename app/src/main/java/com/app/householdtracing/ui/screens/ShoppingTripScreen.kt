@@ -3,6 +3,7 @@ package com.app.householdtracing.ui.screens
 import android.content.Context
 import android.content.Intent
 import android.os.Build
+import android.text.style.StyleSpan
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -105,6 +106,7 @@ fun TripItem(
             painter = icon,
             contentDescription = null
         )
+
         Text(
             text = text,
             style = MaterialTheme.typography.displayMedium.copy(

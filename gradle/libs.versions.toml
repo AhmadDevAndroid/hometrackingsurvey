@@ -68,7 +68,7 @@ room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room-db"
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room-db" }
 room-ksp = { group = "androidx.room", name = "room-compiler", version.ref = "room-db" }
 navigation-compose = { module = "androidx.navigation:navigation-compose", version.ref = "composeNavigation" }
-kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization"}
+kotlinx-serialization-json = { module = "org.jetbrains.kotlinx:kotlinx-serialization-json", version.ref = "serialization" }
 
 camera-core = { group = "androidx.camera", name = "camera-core", version.ref = "camerax" }
 camera-camera2 = { group = "androidx.camera", name = "camera-camera2", version.ref = "camerax" }

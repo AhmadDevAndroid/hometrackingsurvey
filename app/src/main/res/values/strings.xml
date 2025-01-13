@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">HouseHoldTracing</string>
+    <string name="app_name">HouseHold</string>
 
     <string name="allow_permission">Allow Permission</string>
     <string name="deny_permission">Deny</string>

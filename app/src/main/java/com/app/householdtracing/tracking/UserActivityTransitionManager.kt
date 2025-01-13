@@ -31,7 +31,7 @@ class UserActivityTransitionManager(private val context: Context) {
     }
 
     fun observeUserActivity(activityInfo: ActivityInfo) {
-        if (isConfidenceSatisfied(activityInfo.confidenct)) {
+        if (isConfidenceSatisfied(activityInfo.confident)) {
             if (activityInfo.type == DetectedActivity.STILL) {
                 if (!isUserInStillStateInitially) {
                     isUserInStillStateInitially = true

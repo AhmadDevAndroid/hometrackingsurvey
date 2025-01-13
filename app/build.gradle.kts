@@ -10,7 +10,7 @@ plugins {
 android {
     namespace = "com.app.householdtracing"
     compileSdk = 35
-    flavorDimensions("environment")
+    flavorDimensions += "environment"
 
     defaultConfig {
         applicationId = "com.app.householdtracing"

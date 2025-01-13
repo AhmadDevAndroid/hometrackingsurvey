@@ -13,7 +13,7 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.app.householdtracing.data.model.responsedto.LoginResponseBody
-import com.app.householdtracing.navigation.Screen
+import com.app.householdtracing.navigation.Screens
 import com.app.householdtracing.ui.screens.LoginScreen
 import com.app.householdtracing.ui.screens.ShoppingCameraScreen
 import com.app.householdtracing.ui.screens.ShoppingTripScreen
@@ -45,8 +45,8 @@ fun NavigationHandler() {
     val startDestination = remember(loginState) {
         when {
             loginState.token == "initial" -> null
-            loginState.token.isNotEmpty() -> Screen.ShoppingTripScreen.route
-            else -> Screen.LoginScreen.route
+            loginState.token.isNotEmpty() -> Screens.ShoppingTripScreen
+            else -> Screens.LoginScreen
         }
     }
 
@@ -57,28 +57,28 @@ fun NavigationHandler() {
 
     NavHost(
         navController = navController,
-        startDestination = Screen.ShowShoppingCameraScreen.route
+        startDestination = startDestination//Screens.ShowShoppingCameraScreen
     ) {
-        composable(Screen.LoginScreen.route) {
+        composable<Screens.LoginScreen> {
             LoginScreen(onLoginClick = {
-                navController.navigate(Screen.ShoppingTripScreen.route) {
+                navController.navigate(Screens.ShoppingTripScreen) {
                     launchSingleTop = true
-                    popUpTo(Screen.LoginScreen.route) { inclusive = true }
+                    popUpTo(Screens.LoginScreen) { inclusive = true }
                 }
 
             })
         }
-        composable(Screen.ShoppingTripScreen.route) {
+        composable<Screens.ShoppingTripScreen> {
             ShoppingTripScreen(
                 onGrocerMissionClick = {
-                    navController.navigate(Screen.ShowShoppingCameraScreen.route)
+                    navController.navigate(Screens.ShowShoppingCameraScreen)
                 },
                 onTopUpMissionClick = {},
                 onImpulseBuyingMissionClick = {}
             )
         }
 
-        composable(Screen.ShowShoppingCameraScreen.route) {
+        composable<Screens.ShowShoppingCameraScreen> {
             ShoppingCameraScreen(
                 onBackClick = {
                     navController.popBackStack()

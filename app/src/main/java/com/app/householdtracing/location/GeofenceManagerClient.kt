@@ -80,7 +80,7 @@ class GeofenceManagerClient(private val context: Context) {
         if (geofenceList.isEmpty()) {
             showLogError(
                 "$APP_TAG GeoFenceManagerClient",
-                "registerGeofence: No geofences to register."
+                "registerGeofence: No geofence to register."
             )
             return
         }

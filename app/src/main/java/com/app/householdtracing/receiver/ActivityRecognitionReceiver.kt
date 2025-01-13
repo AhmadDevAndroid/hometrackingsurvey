@@ -32,7 +32,7 @@ class ActivityRecognitionReceiver : BroadcastReceiver() {
         }
 
         val activityInfo = ActivityInfo(
-            confidenct = activity.confidence,
+            confident = activity.confidence,
             type = activity.type,
             time = DateUtil.getHourAndMinute()
         )
@@ -40,7 +40,6 @@ class ActivityRecognitionReceiver : BroadcastReceiver() {
         scope.launch {
             userActivityRepository.postRecognition(activityInfo)
         }
-
         logActivityType(activity.type)
     }
 
