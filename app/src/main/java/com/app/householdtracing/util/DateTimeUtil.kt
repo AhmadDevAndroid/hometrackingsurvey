@@ -93,6 +93,11 @@ object DateUtil {
         return alarmTimes
     }
 
+    fun getCurrentDate(): String {
+        val dateFormat = SimpleDateFormat("dd / MMM / yyyy", Locale.getDefault())
+        return dateFormat.format(Date())
+    }
+
 
 }
 

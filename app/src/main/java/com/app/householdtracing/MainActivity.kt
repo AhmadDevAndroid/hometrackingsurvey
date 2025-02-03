@@ -1,6 +1,8 @@
 package com.app.householdtracing
 
 import android.os.Bundle
+import android.view.ViewGroup
+import android.widget.Button
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
@@ -14,9 +16,11 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.app.householdtracing.data.model.responsedto.LoginResponseBody
 import com.app.householdtracing.navigation.Screens
+import com.app.householdtracing.ui.screens.CalendarScreen
 import com.app.householdtracing.ui.screens.LoginScreen
 import com.app.householdtracing.ui.screens.ShoppingCameraScreen
 import com.app.householdtracing.ui.screens.ShoppingTripScreen
+import com.app.householdtracing.ui.screens.StoresMapScreen
 import com.app.householdtracing.ui.theme.HouseHoldTheme
 import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
 import org.koin.androidx.compose.koinViewModel
@@ -25,6 +29,17 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+//        val crashButton = Button(this)
+//        crashButton.text = "Test Crash"
+//        crashButton.setOnClickListener {
+//            throw RuntimeException("Test Crash") // Force a crash
+//        }
+//
+//        addContentView(crashButton, ViewGroup.LayoutParams(
+//            ViewGroup.LayoutParams.MATCH_PARENT,
+//            ViewGroup.LayoutParams.WRAP_CONTENT))
+
         enableEdgeToEdge()
 
         setContent {
@@ -57,7 +72,7 @@ fun NavigationHandler() {
 
     NavHost(
         navController = navController,
-        startDestination = startDestination//Screens.ShowShoppingCameraScreen
+        startDestination = Screens.CalendarScreen
     ) {
         composable<Screens.LoginScreen> {
             LoginScreen(onLoginClick = {
@@ -71,7 +86,7 @@ fun NavigationHandler() {
         composable<Screens.ShoppingTripScreen> {
             ShoppingTripScreen(
                 onGrocerMissionClick = {
-                    navController.navigate(Screens.ShowShoppingCameraScreen)
+                    navController.navigate(Screens.CalendarScreen)
                 },
                 onTopUpMissionClick = {},
                 onImpulseBuyingMissionClick = {}
@@ -83,6 +98,20 @@ fun NavigationHandler() {
                 onBackClick = {
                     navController.popBackStack()
                 }
+            )
+        }
+
+        composable<Screens.CalendarScreen> {
+            CalendarScreen(
+                onBackClick = {navController.popBackStack()},
+                onNextClick = {navController.navigate(Screens.StoresMapScreen)}
+            )
+        }
+
+        composable<Screens.StoresMapScreen> {
+            StoresMapScreen(
+                onBackClick = {navController.popBackStack()},
+                onNextClick = {navController.navigate(Screens.ShowShoppingCameraScreen)}
             )
         }
     }

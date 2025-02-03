@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "856227317272",
+    "project_id": "household-ec77d",
+    "storage_bucket": "household-ec77d.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:856227317272:android:4aff57562bbfc4a19da56d",
+        "android_client_info": {
+          "package_name": "com.app.householdtracing"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBpZIC10x5SPqhtSaIi4ut7x3TDmz9trQE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

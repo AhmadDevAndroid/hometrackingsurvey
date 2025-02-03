@@ -33,7 +33,7 @@ class CameraProcessor(
 
     private val executor = Executors.newSingleThreadExecutor()
     private val barcodeScanner = BarcodeScanning.getClient(
-        BarcodeScannerOptions.Builder().setBarcodeFormats(Barcode.FORMAT_ALL_FORMATS).build()
+        BarcodeScannerOptions.Builder().build()
     )
     private val textRecognizer = TextRecognition.getClient(TextRecognizerOptions.Builder().build())
     private var imageAnalysis: ImageAnalysis? = null

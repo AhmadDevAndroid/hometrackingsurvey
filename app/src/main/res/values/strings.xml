@@ -38,4 +38,15 @@
     <string name="tv_camera_screen_title">Show your\nShopping</string>
     <string name="tv_scan_product">Scan Your Receipt or QR Code</string>
     <string name="btn_scan">Scan</string>
+
+    <!--Calendar Screen-->
+    <string name="tv_when_you_buy">When did you Buy?</string>
+    <string name="tv_select_date">Select Date</string>
+    <string name="btn_next">Next</string>
+
+    <!--Stores Map Screen-->
+    <string name="tv_where_you_buy">Where did You Buy?</string>
+    <string name="tv_shop_store">Shop/Store</string>
+    <string name="tv_select_through_map">Select through Map</string>
+    <string name="tv_search">Search</string>
 </resources>

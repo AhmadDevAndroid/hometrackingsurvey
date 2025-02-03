@@ -13,5 +13,11 @@ sealed class Screens {
 
     @Serializable
     data object ShowShoppingCameraScreen : Screens()
+
+    @Serializable
+    data object CalendarScreen : Screens()
+
+    @Serializable
+    data object StoresMapScreen : Screens()
 }
 

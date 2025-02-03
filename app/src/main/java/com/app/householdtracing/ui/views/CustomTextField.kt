@@ -46,6 +46,7 @@ import com.app.householdtracing.ui.theme.HouseHoldTheme
 import com.app.householdtracing.ui.theme.hintColor
 import com.app.householdtracing.ui.theme.placeholderHintColor
 import com.app.householdtracing.ui.theme.primaryLightColor
+import com.app.householdtracing.ui.theme.secondaryTextColor
 import com.app.householdtracing.ui.theme.textFieldColor
 
 @SuppressLint("UnrememberedMutableInteractionSource")
@@ -159,6 +160,124 @@ fun CustomTextField(
                         }
                     }
 
+                    innerTextField()
+                }
+
+            },
+            keyboardActions = keyboardActions,
+            keyboardOptions = keyboardOptions
+        )//Textfield
+
+    }
+}
+
+
+@SuppressLint("UnrememberedMutableInteractionSource")
+@Composable
+fun CustomTextFieldDate(
+    text: String,
+    modifier: Modifier = Modifier
+        .fillMaxWidth()
+        .height(41.dp)
+        .background(primaryLightColor, RoundedCornerShape(18.dp)),
+    value: String,
+    onValueChange: (String) -> Unit,
+    textStyle: TextStyle = MaterialTheme.typography.bodyLarge.copy(
+        lineHeight = 14.sp,
+        color = textFieldColor
+    ),
+    placeholder: String = "",
+    isStoreScreen: Boolean,
+    readOnly: Boolean = false,
+    // onDropdownClick: () -> Unit,
+    keyboardOptions: KeyboardOptions = KeyboardOptions(
+        imeAction = ImeAction.Next,
+        keyboardType = KeyboardType.Text
+    ),
+    keyboardActions: KeyboardActions = KeyboardActions()
+) {
+    val focusRequester = remember { FocusRequester() }
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = HouseHoldTheme.dimens.grid_4)
+    ) {
+        Text(
+            text = text,
+            style = MaterialTheme.typography.labelLarge.copy(
+                fontSize = 15.sp,
+                lineHeight = 22.5.sp,
+                textAlign = TextAlign.Start,
+                color = secondaryTextColor
+            ),
+            maxLines = 1,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = HouseHoldTheme.dimens.grid_0_5)
+
+        )//Text
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(HouseHoldTheme.dimens.grid_1)
+        )
+
+        BasicTextField(
+            value = value,
+            onValueChange = onValueChange,
+            textStyle = textStyle,
+            modifier = modifier
+                .focusRequester(focusRequester)
+                .focusable()
+                .onKeyEvent { event ->
+                    if (event.key == Key.Enter) {
+                        keyboardController?.hide()
+                        true
+                    } else {
+                        false
+                    }
+                },
+            enabled = true,
+            readOnly = readOnly,
+            visualTransformation = VisualTransformation.None,
+            singleLine = true,
+            interactionSource = MutableInteractionSource(),
+            maxLines = 1,
+            cursorBrush = SolidColor(textFieldColor),
+            decorationBox = @Composable { innerTextField ->
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = HouseHoldTheme.dimens.grid_2),
+                    contentAlignment = Alignment.CenterStart
+                ) {
+                    if (value.isEmpty()) {
+                        Text(
+                            text = placeholder,
+                            style = MaterialTheme.typography.bodyLarge.copy(
+                                lineHeight = 14.sp,
+                                color = placeholderHintColor,
+                                textAlign = TextAlign.Start
+                            ),
+                            maxLines = 1
+                        )
+                    }
+                    if (isStoreScreen) {
+                        IconButton(
+                            onClick = {},
+                            modifier = Modifier
+                                .align(Alignment.CenterEnd),
+                            interactionSource = MutableInteractionSource(),
+                        ) {
+                            Icon(
+                                painter = painterResource(R.drawable.ic_dropdown),
+                                contentDescription = null,
+                                tint = placeholderHintColor
+                            )
+                        }
+                    }
                     innerTextField()
                 }
 

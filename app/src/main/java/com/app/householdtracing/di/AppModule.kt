@@ -19,6 +19,7 @@ import com.app.householdtracing.network.services.HouseHoldApiService
 import com.app.householdtracing.sensors.SensorDetectionManager
 import com.app.householdtracing.tracking.UserActivityTransitionManager
 import com.app.householdtracing.ui.viewmodels.LoginScreenViewModel
+import com.app.householdtracing.ui.viewmodels.SharedViewModel
 import okhttp3.OkHttpClient
 import okhttp3.logging.HttpLoggingInterceptor
 import org.koin.core.module.dsl.viewModel
@@ -63,6 +64,7 @@ val appModule = module {
     single { get<AppDatabase>().homeTrackingDao() }
 
     viewModel { LoginScreenViewModel(get()) }
+    viewModel { SharedViewModel() }
 
     single {
         DataStoreFactory.create(

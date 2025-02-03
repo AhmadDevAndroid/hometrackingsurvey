@@ -1,11 +1,11 @@
 package com.app.householdtracing.data.repositoryImpl
 
 import androidx.datastore.core.DataStore
-import com.app.householdtracing.LoginResponse
 import com.app.householdtracing.data.model.responsedto.LoginResponseBody
 import com.app.householdtracing.data.model.requestdto.LoginRequestBody
 import com.app.householdtracing.network.services.HouseHoldApiService
 import kotlinx.coroutines.flow.map
+import com.app.householdtracing.LoginResponse
 
 class AuthRepositoryImpl(private val dataStore: DataStore<LoginResponse>,private val api: HouseHoldApiService) {
     suspend fun authenticate(identifier: String, password: String): Result<LoginResponseBody> {

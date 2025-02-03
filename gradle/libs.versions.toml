@@ -1,5 +1,6 @@
 [versions]
 agp = "8.7.3"
+firebaseBom = "33.8.0"
 kotlin = "2.0.0"
 kotlin-compose = "2.0.0"
 coreKtx = "1.15.0"
@@ -12,6 +13,9 @@ lifecycleRuntimeKtx = "2.8.7"
 activityCompose = "1.9.3"
 composeBom = "2024.12.01"
 composeNavigation = "2.8.5"
+mapsComposeVersion = "2.11.4"
+playServicesLocation = "21.3.1"
+playServicesMaps = "19.0.0"
 serialization = "1.6.3"
 
 play-services = "21.3.0"
@@ -32,7 +36,12 @@ mlkit-text-recognition = "16.0.1"
 
 
 [libraries]
+android-maps-compose = { module = "com.google.maps.android:maps-compose", version.ref = "mapsComposeVersion" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
+firebase-analytics = { module = "com.google.firebase:firebase-analytics" }
+firebase-bom = { module = "com.google.firebase:firebase-bom", version.ref = "firebaseBom" }
+firebase-crashlytics = { module = "com.google.firebase:firebase-crashlytics" }
+firebase-perf = { module = "com.google.firebase:firebase-perf" }
 junit = { group = "junit", name = "junit", version.ref = "junit" }
 androidx-junit = { group = "androidx.test.ext", name = "junit", version.ref = "junitVersion" }
 androidx-espresso-core = { group = "androidx.test.espresso", name = "espresso-core", version.ref = "espressoCore" }
@@ -49,6 +58,7 @@ androidx-material3 = { group = "androidx.compose.material3", name = "material3" 
 
 google-play-services = { group = "com.google.android.gms", name = "play-services-location", version.ref = "play-services" }
 kotlinx-coroutines-play-services = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-play-services", version.ref = "kotlinxCoroutinesPlayServices" }
+play-services-maps = { module = "com.google.android.gms:play-services-maps", version.ref = "playServicesMaps" }
 work-manager = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "worker" }
 retrofit-convertor = { group = "com.squareup.retrofit2", name = "converter-gson", version.ref = "retrofit-version" }
 retrofit-main = { group = "com.squareup.retrofit2", name = "retrofit", version.ref = "retrofit-version" }

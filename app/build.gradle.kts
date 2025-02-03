@@ -5,6 +5,9 @@ plugins {
     alias(libs.plugins.ksp.room)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.proto)
+    id("com.google.gms.google-services")
+    id("com.google.firebase.crashlytics")
+    id("com.google.firebase.firebase-perf")
 }
 
 android {
@@ -117,6 +120,12 @@ dependencies {
 
     implementation(libs.mlkit.barcode)
     implementation(libs.mlkit.text)
+    implementation(platform(libs.firebase.bom))
+    implementation(libs.firebase.crashlytics)
+    implementation(libs.firebase.analytics)
+    implementation(libs.firebase.perf)
+    implementation (libs.android.maps.compose)
+    implementation (libs.play.services.maps)
 }
 
 protobuf {
